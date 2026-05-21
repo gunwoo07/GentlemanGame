@@ -5,11 +5,15 @@ from src.renderer import *
 
 
 
+wave_list = [
+    ["normal", "normal", "normal", "normal", "normal", "normal", "normal"],
+    ["normal", "normal", "normal", "normal", "fast", "fast", "fast", "fast", "fast", "fast"],
+    ["strong", "strong", "strong", "normal", "normal", "normal", "normal", "fast", "fast", "fast"],
+    ["strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast", "fast", "fast"],
+    ["strong", "strong", "strong", "boss"]
+]
 
-tower_list = []
-enemy_list = []
-
-enemy_list.append(enemy("strong", *get_pos(0, START_ROW)))
+ENEMY_SPAWN = pygame.USEREVENT + 1
 
 class Game:
     def __init__(self):
@@ -19,11 +23,14 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.shortest_path = find_shortest_path(game_map)
+        self.enemy_list = []
+        self.tower_list = []
+        self.wave = 0
 
     def update(self, dt):
         self.shortest_path = find_shortest_path(game_map)
         
-        for e in enemy_list:
+        for e in self.enemy_list:
             e.move(self.shortest_path, dt)
 
     def handle_event(self):
@@ -33,12 +40,28 @@ class Game:
                 self.running = False
                 pygame.quit()
 
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.wave += 1
+                    pygame.time.set_timer(ENEMY_SPAWN, 1000)
+
+            elif event.type == ENEMY_SPAWN:
+                if self.wave <= len(wave_list):
+                    if wave_list[self.wave-1]:
+                        enemy_type = wave_list[self.wave-1].pop(0)
+                        self.enemy_list.append(enemy(enemy_type, *get_pos(0, 8)))
+                else:
+                    pygame.time.set_timer(ENEMY_SPAWN, 0)
+
 
     def play(self):
 
         while self.running:
             self.clock.tick(60)
             dt = self.clock.get_time() / 1000
+
+            
+
             
             self.handle_event()
             self.update(dt)
@@ -46,8 +69,8 @@ class Game:
 
             game_state = {
                 "map":game_map,
-                "towers":tower_list,
-                "enemies":enemy_list,
+                "towers":self.tower_list,
+                "enemies":self.enemy_list,
                 "path":self.shortest_path,
                 "stat": {
                     "gold" : 0,
@@ -56,6 +79,8 @@ class Game:
                     "max_wave" : 5 
                 }
             }
+
+
 
 
     
