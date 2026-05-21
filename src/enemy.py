@@ -1,5 +1,6 @@
 import pygame
 from map import *
+from config import *
 
 enemy_info = [
     (100, 10, 50), # hp, speed, gold,  / normal

@@ -37,7 +37,7 @@ class Tower:
     def __init__(self, x, y, type_name):
         self.grid_x = x
         self.grid_y = y
-        self.pos = pygame.Vector2((x + 0.5) * TILE_SIZE + MAP_MARGIN, (y + 0.5) * TILE_SIZE + MAP_MARGIN)
+        self.pos = pygame.Vector2((x + 0.5) * TILE_SIZE + MARGIN, (y + 0.5) * TILE_SIZE + MARGIN)
 
         if type_name == "archer":
             self.damage = 15

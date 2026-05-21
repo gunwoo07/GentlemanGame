@@ -1,14 +1,8 @@
-TILE_SIZE = 40
-ROWS = 16
-COLS = 24
-START_ROW = 8
-MAP_WIDTH = COLS * TILE_SIZE
-MAP_HEIGHT = ROWS * TILE_SIZE
-MAP_MARGIN = 20
+from config import *
 
 def get_pos(ix, iy):
-    x = ix*TILE_SIZE + TILE_SIZE/2 + MAP_MARGIN
-    y = iy*TILE_SIZE + TILE_SIZE/2 + MAP_MARGIN
+    x = ix*TILE_SIZE + TILE_SIZE/2 + MARGIN
+    y = iy*TILE_SIZE + TILE_SIZE/2 + MARGIN
     return x, y
 
 game_map = [
@@ -112,3 +106,4 @@ def find_shortest_path(game_map):
 
     return path
 
+SHORTEST_PATH = find_shortest_path(game_map)
