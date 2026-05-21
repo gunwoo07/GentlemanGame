@@ -1,8 +1,6 @@
-from pydoc import text
-
 import pygame
-import map
-from config import *
+from src.map import *
+from src.config import *
 
 class Renderer:
     def __init__(self, screen):
@@ -16,16 +14,16 @@ class Renderer:
         self.draw_stat(game_state['stat'])
         
     def draw_map(self, game_map):
-        for i in range(map.ROWS):
-            for j in range(map.COLS):
+        for i in range(ROWS):
+            for j in range(COLS):
                 if game_map[i][j] == 0:
-                    pygame.draw.rect(self.screen, 'lightgreen', (*map.get_pos(i, j), TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, 'lightgreen', (*get_pos(i, j), TILE_SIZE, TILE_SIZE))
                 if game_map[i][j] == 1:
-                    pygame.draw.rect(self.screen, 'brown', (*map.get_pos(i, j), TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, 'brown', (*get_pos(i, j), TILE_SIZE, TILE_SIZE))
                 elif game_map[i][j] == 2:
-                    pygame.draw.rect(self.screen, 'red', (*map.get_pos(i, j), TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, 'red', (*get_pos(i, j), TILE_SIZE, TILE_SIZE))
                 elif game_map[i][j] == 3:
-                    pygame.draw.rect(self.screen, 'green', (*map.get_pos(i, j), TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, 'green', (*get_pos(i, j), TILE_SIZE, TILE_SIZE))
     
     def draw_towers(self, towers):
         for tower in towers:
@@ -37,9 +35,9 @@ class Renderer:
 
     def draw_stat(self, stat):
         pygame.draw.rect(self.screen, 'black', (MARGIN, MARGIN*2+MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT))
-        font = pygame.font.SysFont("malgungothic", 24)
-        stat_text = font.render(f"골드: {stat['gold']}\nHP: {stat['hp']}\n웨이브: {stat['wave']}/{stat['max_wave']}", True, 'white')
-        self.screen.blit(stat_text, (MARGIN*2, MARGIN*2+MAP_HEIGHT+STAT_HEIGHT/4))
+        # font = pygame.font.SysFont("malgungothic", 24)
+        # stat_text = font.render(f"골드: {stat['gold']}\nHP: {stat['hp']}\n웨이브: {stat['wave']}/{stat['max_wave']}", True, 'white')
+        # self.screen.blit(stat_text, (MARGIN*2, MARGIN*2+MAP_HEIGHT+STAT_HEIGHT/4))
 
 """
 {

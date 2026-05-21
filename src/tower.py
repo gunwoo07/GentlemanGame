@@ -1,5 +1,5 @@
 import pygame
-from map import *
+from src.map import *
 
 ### 미완성입니다. 일단은 타워의 위치와 종류만 저장하는 형태로 구현했습니다. 공격과 스킬은 나중에 추가할 예정입니다.
 class Bullet:

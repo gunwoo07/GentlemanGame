@@ -1,4 +1,4 @@
-from config import *
+from src.config import *
 
 def get_pos(ix, iy):
     x = ix*TILE_SIZE + TILE_SIZE/2 + MARGIN

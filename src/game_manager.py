@@ -1,11 +1,10 @@
 import pygame
-from map import *
-from enemy import *
-from renderer import *
+from src.map import *
+from src.enemy import *
+from src.renderer import *
 renderer = Renderer(pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT)))
 
-clock = pygame.time.Clock()
-running = True
+
 
 tower_list = []
 enemy_list = []
@@ -15,6 +14,9 @@ class Game:
         pass
 
     def play(self):
+
+        clock = pygame.time.Clock()
+        running = True
 
         while running:
             clock.tick(60)
