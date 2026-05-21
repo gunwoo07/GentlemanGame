@@ -1,5 +1,5 @@
 import pygame
-from src.map import *
+from src.map import get_pos_lefttop
 from src.config import *
 
 class Renderer:
@@ -17,14 +17,14 @@ class Renderer:
         for i in range(ROWS):
             for j in range(COLS):
                 if game_map[i][j] == 0:
-                    pygame.draw.rect(self.screen, 'lightgreen', (*get_pos(i, j), TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, 'lightgreen', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
                 if game_map[i][j] == 1:
-                    pygame.draw.rect(self.screen, 'brown', (*get_pos(i, j), TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, 'brown', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
                 elif game_map[i][j] == 2:
-                    pygame.draw.rect(self.screen, 'red', (*get_pos(i, j), TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, 'red', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
                 elif game_map[i][j] == 3:
-                    pygame.draw.rect(self.screen, 'green', (*get_pos(i, j), TILE_SIZE, TILE_SIZE))
-    
+                    pygame.draw.rect(self.screen, 'green', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
+
     def draw_towers(self, towers):
         for tower in towers:
             tower.draw(self.screen)

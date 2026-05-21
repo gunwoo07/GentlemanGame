@@ -5,6 +5,11 @@ def get_pos(ix, iy):
     y = iy*TILE_SIZE + TILE_SIZE/2 + MARGIN
     return x, y
 
+def get_pos_lefttop(ix, iy):
+    x = ix*TILE_SIZE + MARGIN
+    y = iy*TILE_SIZE + MARGIN
+    return x, y
+
 game_map = [
     [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
