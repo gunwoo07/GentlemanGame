@@ -3,10 +3,19 @@ from src.map import get_pos_lefttop, get_pos
 from src.tower import Archer, Cannon, Frost
 from src.config import *
 
+class TowerButton:
+    def __init__(self, tower, x, y):
+        self.tower = tower
+        self.rect = pygame.Rect(x, y, 120, 80)
+
 class Renderer:
     def __init__(self, screen):
         self.screen = screen
-    
+                
+        # 폰트 설정 (이름용은 작게, 정보용은 크게)
+        self.font = pygame.font.SysFont("malgungothic", 20)
+        self.title_font = pygame.font.SysFont("malgungothic", 16)
+
     def render(self, game_state):
         self.screen.fill((75, 0, 130)) # indigo blue
         self.draw_map(game_state['map'])
@@ -41,10 +50,6 @@ class Renderer:
         stat_rect = (MARGIN, MARGIN*2 + MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT)
         pygame.draw.rect(self.screen, 'black', stat_rect)
         
-        # 폰트 설정 (이름용은 작게, 정보용은 크게)
-        font = pygame.font.SysFont("malgungothic", 20)
-        title_font = pygame.font.SysFont("malgungothic", 16)
-        
         # 2. 버튼 설정 (크기 및 시작 위치)
         btn_width = 120
         btn_height = 80
@@ -72,8 +77,8 @@ class Renderer:
             pygame.draw.circle(self.screen, tower['color'], (bx + 30, by + 40), 20)
             
             # [텍스트 정보 - 오른쪽 배치]
-            name_text = title_font.render(tower['name'], True, 'white')
-            cost_text = title_font.render(f"{tower['cost']}G", True, 'yellow')
+            name_text = self.title_font.render(tower['name'], True, 'white')
+            cost_text = self.title_font.render(f"{tower['cost']}G", True, 'yellow')
             
             self.screen.blit(name_text, (bx + 60, by + 25))
             self.screen.blit(cost_text, (bx + 60, by + 45))
@@ -81,7 +86,7 @@ class Renderer:
         # 4. 하단 게임 정보 (버튼들 바로 아래에 한 줄로 표시)
         info_y = btn_y + btn_height + 20
         status_info = f"골드: {stat['gold']}   HP: {stat['hp']}   웨이브: {stat['wave']}/{stat['max_wave']}"
-        stat_text = font.render(status_info, True, 'white')
+        stat_text = self.font.render(status_info, True, 'white')
         
         self.screen.blit(stat_text, (start_x, info_y))
 
