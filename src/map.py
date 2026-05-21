@@ -111,4 +111,3 @@ def find_shortest_path(game_map):
 
     return path
 
-SHORTEST_PATH = find_shortest_path(game_map)

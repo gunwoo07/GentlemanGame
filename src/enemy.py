@@ -3,10 +3,10 @@ from src.map import *
 from src.config import *
 
 enemy_info = [
-    (100, 10, 50), # hp, speed, gold,  / normal
-    (100, 15, 70), # fast
-    (200, 7, 100), # strong
-    (1000, 10, 500) # boss
+    (100, 30, 50), # hp, speed, gold,  / normal
+    (100, 45, 70), # fast
+    (200, 21, 100), # strong
+    (1000, 30, 500) # boss
 ]
 
 enemy_type = ["normal", "fast", "strong", "boss"]
@@ -16,11 +16,13 @@ def movex(tx, x, speed):
         x += speed
     else : 
         x -= speed
+    return x
 def movey(ty, y, speed):
     if ty > y:
         y += speed
     else : 
         y -= speed
+    return y
 
 class enemy:
     def __init__(self, type, x, y):
@@ -34,23 +36,24 @@ class enemy:
             self.gold = enemy_info[enemy_type.index(self.type)][2]
 
 
-    def move(self):
+    def move(self, shortest_path, dt):
 
-        remain = self.speed
+        remain = self.speed * dt
 
-        tx, ty = get_pos(SHORTEST_PATH[self.target_index][0], SHORTEST_PATH[self.target_index][1])
+        tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
 
         if self.x != tx:
             dist = abs(tx - self.x)
 
-            if self.speed >= dist:
+            if self.speed * dt >= dist:
                 self.x = tx
                 remain -= dist
                 self.target_index += 1
-                tx, ty = get_pos(SHORTEST_PATH[self.target_index][0], SHORTEST_PATH[self.target_index][1])
-                movey(ty, self.y, remain)
+                tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
+                self.y = movey(ty, self.y, remain)
+                
             else:
-                movex(tx, self.x, self.speed)
+                self.x = movex(tx, self.x, self.speed * dt)
 
         elif self.y != ty:
 
@@ -60,10 +63,10 @@ class enemy:
                 self.y = ty
                 remain -= dist
                 self.target_index += 1
-                tx, ty = get_pos(SHORTEST_PATH[self.target_index][0], SHORTEST_PATH[self.target_index][1])
-                movex(tx, self.x, remain)
+                tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
+                self.x = movex(tx, self.x, remain)
             else:
-                movey(ty, self.y, self.speed)
+                self.y = movey(ty, self.y, self.speed * dt)
 
         else:
             self.target_index += 1
