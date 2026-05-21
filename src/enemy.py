@@ -37,7 +37,6 @@ class enemy:
 
 
     def move(self, shortest_path, dt):
-        print(self.target_index)
 
         remain = self.speed * dt
 
@@ -50,8 +49,6 @@ class enemy:
             if remain >= dist:
                 self.x = tx
                 remain -= dist
-                print(1)
-                print(remain, dist)
                 self.target_index += 1
                 tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
                 if shortest_path[self.target_index][1] == shortest_path[self.target_index - 1][1]:
