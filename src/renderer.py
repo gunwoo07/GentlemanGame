@@ -3,10 +3,6 @@ from src.map import get_pos_lefttop, get_pos
 from src.tower import Archer, Cannon, Frost
 from src.config import *
 
-class TowerButton:
-    def __init__(self, tower, x, y):
-        self.tower = tower
-        self.rect = pygame.Rect(x, y, 120, 80)
 
 class Renderer:
     def __init__(self, screen):
