@@ -66,8 +66,6 @@ class enemy:
             if remain >= dist:
                 self.y = ty
                 remain -= dist
-                print(2)
-                print(remain, dist)
                 self.target_index += 1
                 tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
                 if shortest_path[self.target_index][1] == shortest_path[self.target_index - 1][1]:

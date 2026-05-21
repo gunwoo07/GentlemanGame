@@ -6,11 +6,6 @@ from src.renderer import *
 
 
 
-tower_list = []
-enemy_list = []
-
-enemy_list.append(enemy("strong", *get_pos(0, START_ROW)))
-
 class Game:
     def __init__(self):
         pygame.init()
@@ -19,11 +14,15 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.shortest_path = find_shortest_path(game_map)
+        self.tower_list = []
+        self.enemy_list = []
+        self.enemy_list.append(enemy("normal", *get_pos(0, 8)))
+
 
     def update(self, dt):
         self.shortest_path = find_shortest_path(game_map)
         
-        for e in enemy_list:
+        for e in self.enemy_list:
             e.move(self.shortest_path, dt)
 
     def handle_event(self):
@@ -33,6 +32,7 @@ class Game:
                 self.running = False
                 pygame.quit()
 
+    
 
     def play(self):
 
@@ -48,8 +48,8 @@ class Game:
 
             game_state = {
                 "map":game_map,
-                "towers":tower_list,
-                "enemies":enemy_list,
+                "towers":self.tower_list,
+                "enemies":self.enemy_list,
                 "path":self.shortest_path,
                 "stat": {
                     "gold" : 0,
