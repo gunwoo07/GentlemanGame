@@ -9,7 +9,7 @@ from src.renderer import *
 tower_list = []
 enemy_list = []
 
-enemy_list.append(enemy("normal", *get_pos(0, START_ROW)))
+enemy_list.append(enemy("strong", *get_pos(0, START_ROW)))
 
 class Game:
     def __init__(self):
@@ -39,7 +39,6 @@ class Game:
         while self.running:
             self.clock.tick(60)
             dt = self.clock.get_time() / 1000
-            print(dt)
 
 
             
