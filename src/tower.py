@@ -25,14 +25,15 @@ class Iceball(Skill):
 class Tower:
     level = 1
     max_level = 3
+    kill = 0
+    deal = 0
     # example(archer)
     damage = 15
     range = 3*TILE_SIZE
     speed = 0.5 # seconds
     color = "green"
     bullet_speed = 300
-    kill = 0
-    deal = 0
+    cost = 40
 
     def __init__(self, x, y, type_name):
         self.grid_x = x
@@ -78,6 +79,7 @@ class Archer(Tower):
     speed = 0.5
     color = "green"
     bullet_speed = 300
+    cost = 50
     skill_active = False
 
     def __init__(self, x, y):
@@ -95,11 +97,60 @@ class Archer(Tower):
         else:
             b = Bullet()
         
+class Cannon(Tower):
+    type_name = "cannon"
+    damage = 40
+    range = 2.5*TILE_SIZE
+    speed = 0.7
+    color = "gray"
+    bullet_speed = 400
+    cost = 60
+    skill_active = False
+    
+    def __init__(self, x, y):
+        super().__init__(x, y)
 
+    # dt마다 호출 필요
+    def skill_counter(self):
+        if not self.skill_active and self.deal >= 70:
+            self.skill_active = True
+            self.deal = 0
+    
+    def attack(self, target):
+        if self.skill_active:
+            pass
+        else:
+            b = Bullet()
+
+class Frost(Tower):
+    type_name = "frost"
+    damage = 5
+    range = 4*TILE_SIZE
+    speed = 0.6
+    color = "white"
+    bullet_speed = 350
+    cost = 40
+    skill_active = False
+    
+    def __init__(self, x, y):
+        super().__init__(x, y)
+
+    # dt마다 호출 필요
+    def skill_counter(self):
+        if not self.skill_active and self.deal >= 70:
+            self.skill_active = True
+            self.deal = 0
+    
+    def attack(self, target):
+        if self.skill_active:
+            pass
+        else:
+            b = Bullet()
+        
 def create_tower(type_name):
     if type_name == "archer":
         return Archer()
     elif type_name == "cannon":
-        pass
+        return Cannon()
     elif type_name == "frost":
-        pass
+        return Frost()
