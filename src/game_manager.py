@@ -15,6 +15,7 @@ class Game:
         pass
 
     def play(self):
+
         while running:
             clock.tick(60)
 
@@ -34,9 +35,10 @@ class Game:
                     "max_wave" : 5 
                 }
             }
+
+
     
             renderer.render(game_state)
-
             pygame.display.flip()
 
         

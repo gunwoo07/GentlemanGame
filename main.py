@@ -1,5 +1,5 @@
-import pygame
+from src.game_manager import *
 
 if __name__ == "__main__":
-    print("hello world!")
-    print('hd')
+    manager = Game()
+    manager.play()
