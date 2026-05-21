@@ -1,3 +1,5 @@
+from pydoc import text
+
 import pygame
 import map
 from config import *
@@ -36,8 +38,8 @@ class Renderer:
     def draw_stat(self, stat):
         pygame.draw.rect(self.screen, 'black', (MARGIN, MARGIN*2+MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT))
         font = pygame.font.SysFont("malgungothic", 24)
-        text = font.render(f"골드: {stat['gold']}  HP: {stat['hp']}  웨이브: {stat['wave']}/{stat['max_wave']}", True, 'white')
-        self.screen.blit(text, (MARGIN*2, MARGIN*2+MAP_HEIGHT+STAT_HEIGHT/4))
+        stat_text = font.render(f"골드: {stat['gold']}\nHP: {stat['hp']}\n웨이브: {stat['wave']}/{stat['max_wave']}", True, 'white')
+        self.screen.blit(stat_text, (MARGIN*2, MARGIN*2+MAP_HEIGHT+STAT_HEIGHT/4))
 
 """
 {
