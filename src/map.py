@@ -57,10 +57,10 @@ def find_shortest_path(game_map):
 
     # 상하좌우
     directions = [
-        (1, 0),
-        (-1, 0),
         (0, 1),
-        (0, -1)
+        (0, -1),
+        (1, 0),
+        (-1, 0)
     ]
 
     while len(queue) > 0:
