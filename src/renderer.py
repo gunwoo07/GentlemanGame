@@ -3,14 +3,48 @@ from src.map import get_pos_lefttop, get_pos
 from src.tower import Archer, Cannon, Frost
 from src.config import *
 
+class TowerButton:
+    WIDTH = 120
+    HEIGHT = 80
+
+    def __init__(self, tower, bx, by):
+        self.tower = tower
+        self.bx = bx
+        self.by = by
+        self.rect = pygame.Rect(bx, by, self.WIDTH, self.HEIGHT)
+
+    def draw(self, screen, font):
+        # [버튼 배경 및 테두리]
+        pygame.draw.rect(screen, (60, 60, 60), self.rect)
+        pygame.draw.rect(screen, 'white', self.rect, 1)
+
+        # [타워 아이콘 - 왼쪽 배치]
+        pygame.draw.circle(screen, self.tower.color, (self.bx + 30, self.by + 40), 20)
+
+        # [텍스트 정보 - 오른쪽 배치]
+        name_text = font.render(self.tower.type_name, True, 'white')
+        cost_text = font.render(f"{self.tower.cost}G", True, 'yellow')
+
+        screen.blit(name_text, (self.bx + 60, self.by + 25))
+        screen.blit(cost_text, (self.bx + 60, self.by + 45))
+
 
 class Renderer:
     def __init__(self, screen):
         self.screen = screen
-                
-        # 폰트 설정 (이름용은 작게, 정보용은 크게)
         self.font = pygame.font.SysFont("malgungothic", 20)
         self.title_font = pygame.font.SysFont("malgungothic", 16)
+        
+        # 버튼 시작 위치 및 간격 계산
+        start_x = MARGIN * 2
+        btn_y = MARGIN * 2 + MAP_HEIGHT + 15
+        btn_margin = 15
+        
+        self.btn_list = [
+            TowerButton(Archer, start_x + (TowerButton.WIDTH + btn_margin) * 0, btn_y),
+            TowerButton(Cannon, start_x + (TowerButton.WIDTH + btn_margin) * 1, btn_y),
+            TowerButton(Frost, start_x + (TowerButton.WIDTH + btn_margin) * 2, btn_y)
+        ]
 
     def render(self, game_state):
         self.screen.fill((75, 0, 130)) # indigo blue
@@ -46,41 +80,14 @@ class Renderer:
         stat_rect = (MARGIN, MARGIN*2 + MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT)
         pygame.draw.rect(self.screen, 'black', stat_rect)
         
-        # 2. 버튼 설정 (크기 및 시작 위치)
-        btn_width = 120
-        btn_height = 80
-        btn_margin = 15
+        # 2. 버튼 그리기
+        for btn in self.btn_list:
+            btn.draw(self.screen, self.title_font)
+            
+        # 3. 하단 게임 정보 (버튼들 바로 아래에 한 줄로 표시)
         start_x = MARGIN * 2
-        btn_y = MARGIN * 2 + MAP_HEIGHT + 15 # 상자 안쪽에서 살짝 아래로
-        
-        # 타워 데이터
-        tower_data = [
-            {'name': Archer.type_name, 'color': Archer.color, 'cost': Archer.cost},
-            {'name': Cannon.type_name, 'color': Cannon.color,  'cost': Cannon.cost},
-            {'name': Frost.type_name,  'color': Frost.color, 'cost': Frost.cost}
-        ]
-        
-        # 3. 버튼 3개 그리기
-        for i, tower in enumerate(tower_data):
-            bx = start_x + (btn_width + btn_margin) * i
-            by = btn_y
-            
-            # [버튼 배경 및 테두리]
-            pygame.draw.rect(self.screen, (60, 60, 60), (bx, by, btn_width, btn_height))
-            pygame.draw.rect(self.screen, 'white', (bx, by, btn_width, btn_height), 1)
-            
-            # [타워 아이콘 - 왼쪽 배치]
-            pygame.draw.circle(self.screen, tower['color'], (bx + 30, by + 40), 20)
-            
-            # [텍스트 정보 - 오른쪽 배치]
-            name_text = self.title_font.render(tower['name'], True, 'white')
-            cost_text = self.title_font.render(f"{tower['cost']}G", True, 'yellow')
-            
-            self.screen.blit(name_text, (bx + 60, by + 25))
-            self.screen.blit(cost_text, (bx + 60, by + 45))
-
-        # 4. 하단 게임 정보 (버튼들 바로 아래에 한 줄로 표시)
-        info_y = btn_y + btn_height + 20
+        btn_y = MARGIN * 2 + MAP_HEIGHT + 15
+        info_y = btn_y + TowerButton.HEIGHT + 20
         status_info = f"골드: {stat['gold']}   HP: {stat['hp']}   웨이브: {stat['wave']}/{stat['max_wave']}"
         stat_text = self.font.render(status_info, True, 'white')
         
