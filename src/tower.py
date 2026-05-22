@@ -3,13 +3,25 @@ from src.map import *
 
 ### 미완성입니다. 일단은 타워의 위치와 종류만 저장하는 형태로 구현했습니다. 공격과 스킬은 나중에 추가할 예정입니다.
 class Bullet:
-    def __init__(self, projectile, damage, speed, color):
-        self.projectile = projectile
+    size = 5
+    def __init__(self, tower_pos, target_pos, damage, speed, color):
+        self.tower_pos = tower_pos
+        self.target_pos = target_pos
+        self.pos = tower_pos
+        self.projectile = target_pos - tower_pos
         self.damage = damage
         self.speed = speed
+        self.velocity = self.projectile.normalize() * self.speed
         self.color = color
     
-    def draw(self):
+    def move(self, dt):
+        if (self.target_pos - self.pos).length() <= self.speed * dt:
+            self.pos = self.target_pos
+            
+        else:
+            self.pos += self.velocity * dt
+
+    def draw(self, screen):
         pass
 
 class Skill:
@@ -34,35 +46,30 @@ class Tower:
     color = "green"
     bullet_speed = 300
     cost = 40
+    is_selected = False # 선택된 타워는 range가 표시되고, 업그레이드, 정보창이 활성화됩니다.
 
-    def __init__(self, x, y, type_name):
+    def __init__(self, x, y):
         self.grid_x = x
         self.grid_y = y
         self.pos = pygame.Vector2((x + 0.5) * TILE_SIZE + MARGIN, (y + 0.5) * TILE_SIZE + MARGIN)
+        self.rect = pygame.Rect(self.pos.x-TILE_SIZE/2, self.pos.y-TILE_SIZE/2, TILE_SIZE, TILE_SIZE)
 
-        if type_name == "archer":
-            self.damage = 15
-            self.range = 3*TILE_SIZE
-            self.speed = 0.5 # seconds
-            self.color = "green"
-            self.bullet_speed = 300
-        elif type_name == "cannon":
-            self.damage = 40
-            self.range = 2.5*TILE_SIZE
-            self.speed = 0.7
-            self.color = "gray"
-            self.bullet_speed = 400
-        elif type_name == "frost":
-            self.damage = 5
-            self.range = 4*TILE_SIZE
-            self.speed = 0.6
-            self.collor = "white"
-            self.bullet_speed = 350
-    
     def draw(self, screen):
-        pygame.draw.rect(screen, 'blue', (self.pos.x-TILE_SIZE/2, self.pos.y-TILE_SIZE/2, TILE_SIZE, TILE_SIZE))
+        pygame.draw.rect(screen, 'blue', self.rect)
         pygame.draw.circle(screen, self.color, (self.pos.x, self.pos.y), TILE_SIZE/2)
     
+    def draw_range(self, screen):
+        pygame.draw.circle(screen, 'white', (self.pos.x, self.pos.y), self.range, 1)
+
+    def draw_info(self, screen, bx, by, font):
+        tower_name = f"{self.type_name}(lv. {self.level})"
+        tower_info = f"대미지: {self.deal}   범위: {self.range}   공격속도: {self.speed}"
+        tower_name_text = font.render(tower_name, True, 'white')
+        tower_info_text = font.render(tower_info, True, 'white')
+
+        screen.blit(tower_name_text, (bx, by))
+        screen.blit(tower_info_text, (bx, by + 20))
+
     def skill_counter(self):
         pass
     def skill(self):

@@ -2,6 +2,7 @@ import pygame
 from src.map import get_pos_lefttop, get_pos
 from src.tower import Archer, Cannon, Frost
 from src.config import *
+import stat
 
 class TowerButton:
     WIDTH = 120
@@ -32,9 +33,10 @@ class TowerButton:
 class Renderer:
     def __init__(self, screen):
         self.screen = screen
-        self.font = pygame.font.SysFont("malgungothic", 20)
-        self.title_font = pygame.font.SysFont("malgungothic", 16)
-        
+        self.title_font = pygame.font.SysFont("malgungothic", 20)
+        self.font = pygame.font.SysFont("malgungothic", 16)
+        self.small_font = pygame.font.SysFont("malgungothic", 12)
+        self.is_selected_tower = False # 타워가 선택되었는지 여부
         # 버튼 시작 위치 및 간격 계산
         start_x = MARGIN * 2
         btn_y = MARGIN * 2 + MAP_HEIGHT + 15
@@ -49,11 +51,11 @@ class Renderer:
     def render(self, game_state):
         self.screen.fill((75, 0, 130)) # indigo blue
         self.draw_map(game_state['map'])
+        self.draw_stat(game_state['stat'])
         self.draw_path(game_state['path'])
         self.draw_towers(game_state['towers'])
         self.draw_enemies(game_state['enemies'])
-        self.draw_stat(game_state['stat'])
-        
+
     def draw_map(self, game_map):
         for i in range(ROWS):
             for j in range(COLS):
@@ -68,8 +70,19 @@ class Renderer:
                 pygame.draw.rect(self.screen, 'black', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE), 1)
 
     def draw_towers(self, towers):
+        check = True
         for tower in towers:
             tower.draw(self.screen)
+            if tower.is_selected:
+                self.is_selected_tower = True
+                tower.draw_range(self.screen)
+                start_x = MARGIN * 2
+                tower_info_y = MARGIN * 2 + MAP_HEIGHT + 15
+                tower_info_x = start_x + (TowerButton.WIDTH + 15) * 3
+                tower.draw_info(self.screen, tower_info_x, tower_info_y, self.font)
+                check = False
+        if check:
+            self.is_selected_tower = False
 
     def draw_enemies(self, enemies):
         for enemy in enemies:
@@ -82,16 +95,24 @@ class Renderer:
         
         # 2. 버튼 그리기
         for btn in self.btn_list:
-            btn.draw(self.screen, self.title_font)
+            btn.draw(self.screen, self.font)
             
         # 3. 하단 게임 정보 (버튼들 바로 아래에 한 줄로 표시)
         start_x = MARGIN * 2
         btn_y = MARGIN * 2 + MAP_HEIGHT + 15
         info_y = btn_y + TowerButton.HEIGHT + 20
         status_info = f"골드: {stat['gold']}   HP: {stat['hp']}   웨이브: {stat['wave']}/{stat['max_wave']}"
-        stat_text = self.font.render(status_info, True, 'white')
+        stat_text = self.title_font.render(status_info, True, 'white')
         
         self.screen.blit(stat_text, (start_x, info_y))
+
+        if not self.is_selected_tower:
+            text1 = self.font.render("웨이브 시작: 스페이스 바", True, 'white')
+            text2 = self.font.render("타워 선택/배치/합체: 좌클릭", True, 'white')
+            text3 = self.font.render("F: 일시정지   ESC: 타이틀", True, 'white')
+            self.screen.blit(text1, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y))
+            self.screen.blit(text2, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 40))
+            self.screen.blit(text3, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 60))
 
     def draw_path(self, path):
         for i in range(len(path) - 1):
@@ -103,6 +124,7 @@ class Renderer:
 {
     "map":
     "towers":
+    "selected_tower":
     "enemies":
     "stat": {
         "gold":
