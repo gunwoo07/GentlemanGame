@@ -25,6 +25,7 @@ class Game:
         self.shortest_path = find_shortest_path(game_map)
         self.enemy_list = []
         self.tower_list = []
+        self.bullet_list = []
         self.wave = 0
 
     def update(self, dt):
@@ -72,6 +73,7 @@ class Game:
                 "towers":self.tower_list,
                 "enemies":self.enemy_list,
                 "path":self.shortest_path,
+                "bullets": self.bullet_list,
                 "stat": {
                     "gold" : 0,
                     "hp" : 100,
