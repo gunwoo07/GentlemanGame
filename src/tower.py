@@ -4,7 +4,36 @@ from src.map import *
 ### 미완성입니다. 일단은 타워의 위치와 종류만 저장하는 형태로 구현했습니다. 공격과 스킬은 나중에 추가할 예정입니다.
 class Bullet:
     size = 5
-    def __init__(self, tower_pos, target_pos, damage, speed, color):
+    is_finished = False
+    def __init__(self, tower_pos, enemy, damage, speed, color):
+        self.tower_pos = tower_pos.copy()
+        self.enemy = enemy
+        self.target_pos = pygame.Vector2(enemy.x, enemy.y)
+        self.pos = tower_pos.copy()
+        self.projectile = self.target_pos - self.tower_pos
+        self.damage = damage
+        self.speed = speed
+        self.velocity = self.projectile.normalize() * self.speed
+        self.color = color
+    def move(self, dt):
+        if (self.target_pos - self.pos).length() <= self.speed * dt:
+            self.pos = self.target_pos
+            self.enemy.hp -= self.damage
+            self.is_finished = True
+        else:
+            self.pos += self.velocity * dt
+            
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (self.pos.x, self.pos.y), self.size)
+
+class Skill:
+    def __init__(self):
+        pass
+    def move(self, dt, enemies):
+        pass
+
+class InfiniteArrow(Skill):
+    def __init__(self, tower_pos, target_pos, damage, speed):
         self.tower_pos = tower_pos
         self.target_pos = target_pos
         self.pos = tower_pos
@@ -12,33 +41,22 @@ class Bullet:
         self.damage = damage
         self.speed = speed
         self.velocity = self.projectile.normalize() * self.speed
-        self.color = color
-    
-    def move(self, dt):
-        if (self.target_pos - self.pos).length() <= self.speed * dt:
-            self.pos = self.target_pos
-            
-        else:
-            self.pos += self.velocity * dt
-
+    def move(self, dt, enemies): # True 리탄하면 요소 삭제
+        pass
+        # self.pos += self.velocity * dt
+        # for enemy in enemies:
+        #     if (pygame.Vector2(enemy.x, enemy.y) - self.pos).length() <= TILE_SIZE:
+        #         enemy.hp -= self.damage
+        # if self.pos.x < MARGIN or self.pos.x > MARGIN+MAP_HEIGHT or self.pos.y < 0 or self.pos.y > HEIGHT:
+        #     return True
     def draw(self, screen):
-        pass
-
-class Skill:
-    def __init__(self):
-        pass
-class InfiniteArrow(Skill):
-    pass
+        pygame.draw.circle(screen, 'blue', (self.pos.x, self.pos.y), TILE_SIZE/2)
 class Bomb(Skill):
     pass
 class Iceball(Skill):
     pass
 
 class Tower:
-    level = 1
-    max_level = 3
-    kill = 0
-    deal = 0
     # example(archer)
     damage = 15
     range = 3*TILE_SIZE
@@ -46,11 +64,18 @@ class Tower:
     color = "green"
     bullet_speed = 300
     cost = 40
-    is_selected = False # 선택된 타워는 range가 표시되고, 업그레이드, 정보창이 활성화됩니다.
-
+    attack_cooldown = speed # 공격 쿨타임 계산용 변수입니다. attack_cooldown이 0이 되면 공격이 가능합니다.
+    skill_cooldown = 70 # 스킬 쿨타임 계산용 변수입니다. skill_cooldown이 0이 되면 스킬이 사용 가능합니다.
+    
     def __init__(self, x, y):
         self.grid_x = x
         self.grid_y = y
+        self.level = 1
+        self.max_level = 3
+        self.kill = 0
+        self.deal = 0
+        self.skill_rate = 0
+        self.is_selected = False # 선택된 타워는 range가 표시되고, 업그레이드, 정보창이 활성화됩니다.
         self.pos = pygame.Vector2((x + 0.5) * TILE_SIZE + MARGIN, (y + 0.5) * TILE_SIZE + MARGIN)
         self.rect = pygame.Rect(self.pos.x-TILE_SIZE/2, self.pos.y-TILE_SIZE/2, TILE_SIZE, TILE_SIZE)
 
@@ -70,15 +95,45 @@ class Tower:
         screen.blit(tower_name_text, (bx, by))
         screen.blit(tower_info_text, (bx, by + 20))
 
-    def skill_counter(self):
+        # 스킬이 어느정도 준비되었는지 막대바로 pygame 그리기
+        skill_bar_width = 100
+        skill_bar_height = 10
+        skill_bar_x = bx
+        skill_bar_y = by + 50
+        pygame.draw.rect(screen, 'white', (skill_bar_x, skill_bar_y, skill_bar_width, skill_bar_height), 1)
+        if self.skill_rate >= 0:
+            inner_bar_width = skill_bar_width * self.skill_rate
+        else:
+            inner_bar_width = 0
+        pygame.draw.rect(screen, 'yellow', (skill_bar_x, skill_bar_y, inner_bar_width, skill_bar_height))
+
+    def update(self, dt, enemies): # bullet(또는 skill) instance를 return
+        # 스킬 쿨타임이 업데이트
+        # 공격 쿨타임 업데이트
+        # 스킬 쿨타임이 돌았다면 -> 스킬
+        # 스킬 쿨타임이 돌지 않았다면, 공격 쿨타임이 돌았다면 -> 공격
         pass
-    def skill(self):
+    # tower 마다 skill이 다르므로 skill 함수를 tower마다 구현해야 합니다.
+    def skill(self, enemies):
         pass
-    def attack(self, target):
-        pass
+    def attack(self, enemies):
+        closest_enemy = self._get_closest_enemy(enemies)
+        if closest_enemy and (pygame.Vector2(closest_enemy.x, closest_enemy.y) - self.pos).length() <= self.range:
+            # 공격 가능한 상태입니다. 총알을 생성하여 반환해야 합니다.
+            return Bullet(self.pos, closest_enemy, self.damage, self.bullet_speed, self.color)
+        return None
     def level_up(self):
         pass
-
+    def _get_closest_enemy(self, enemies):
+        closest_enemy = None
+        min_distance = float('inf')
+        for enemy in enemies:
+            distance = (pygame.Vector2(enemy.x, enemy.y) - self.pos).length()
+            if distance < min_distance:
+                min_distance = distance
+                closest_enemy = enemy
+        return closest_enemy
+    
 class Archer(Tower):
     type_name = "archer"
     damage = 10
@@ -87,23 +142,36 @@ class Archer(Tower):
     color = "green"
     bullet_speed = 300
     cost = 50
-    skill_active = False
+    attack_cooldown = speed # 공격 쿨타임 계산용 변수입니다. attack_cooldown이 0이 되면 공격이 가능합니다.
+    skill_coolkill = 10
+    skill_cooldown = skill_coolkill # 스킬 쿨타임 계산용 변수
 
     def __init__(self, x, y):
         super().__init__(x, y)
 
-    # dt마다 호출 필요
-    def skill_counter(self):
-        if not self.skill_active and self.deal >= 70:
-            self.skill_active = True
-            self.deal = 0
-    
-    def attack(self, target):
-        if self.skill_active:
-            pass
+    def update(self, dt, enemies):
+        if self.skill_cooldown > 0:
+            self.skill_cooldown = self.skill_coolkill-self.kill
+            self.skill_rate = self.kill / self.skill_coolkill
+            if self.attack_cooldown > 0:
+                self.attack_cooldown -= dt
+                return None
+            else:
+                # 공격 가능한 상태입니다. 공격 로직을 구현해야 합니다. 아직 공격 범위는 확인 안 함
+                self.attack_cooldown = self.speed
+                return self.attack(enemies)
         else:
-            b = Bullet()
-        
+            self.skill_cooldown = self.skill_coolkill
+            self.skill_rate = 0
+            return self.skill(enemies)
+    
+    def skill(self, enemies):
+        return None
+        # closest_enemy = self._get_closest_enemy(enemies)
+        # if closest_enemy:
+        #     return InfiniteArrow(self.pos, pygame.Vector2(closest_enemy.x, closest_enemy.y), self.damage, self.bullet_speed)
+        # return None
+    
 class Cannon(Tower):
     type_name = "cannon"
     damage = 40
@@ -112,22 +180,29 @@ class Cannon(Tower):
     color = "gray"
     bullet_speed = 400
     cost = 60
-    skill_active = False
-    
+    attack_cooldown = speed # 공격 쿨타임 계산용 변수입니다. attack_cooldown이 0이 되면 공격이 가능합니다.
+    skill_cooltime = 15
+    skill_cooldown = skill_cooltime # 스킬 쿨타임 계산용 변수입니다. skill_cooldown이 0이 되면 스킬이 사용 가능합니다
+
     def __init__(self, x, y):
         super().__init__(x, y)
 
-    # dt마다 호출 필요
-    def skill_counter(self):
-        if not self.skill_active and self.deal >= 70:
-            self.skill_active = True
-            self.deal = 0
-    
-    def attack(self, target):
-        if self.skill_active:
-            pass
+    def update(self, dt, enemies):
+        if self.skill_cooldown > 0:
+            self.skill_cooldown -= dt
+            self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
+            if self.attack_cooldown > 0:
+                self.attack_cooldown -= dt
+                return None
+            else:
+                # 공격 가능한 상태입니다. 공격 로직을 구현해야 합니다. 아직 공격 범위는 확인 안 함
+                self.attack_cooldown = self.speed
+                return self.attack(enemies)
         else:
-            b = Bullet()
+            self.skill_cooldown = self.skill_cooltime
+            self.skill_rate = 0
+            return self.skill(enemies)
+    
 
 class Frost(Tower):
     type_name = "frost"
@@ -137,22 +212,30 @@ class Frost(Tower):
     color = "white"
     bullet_speed = 350
     cost = 40
-    skill_active = False
-    
+    attack_cooldown = speed # 공격 쿨타임 계산용 변수입니다. attack_cooldown이 0이 되면 공격이 가능합니다.
+    skill_cooldamage = 60
+    skill_cooldown = skill_cooldamage # 스킬 쿨타임 계산용 변수입니다. skill_cooldown이 0이 되면 스킬이 사용 가능합니다.
+
     def __init__(self, x, y):
         super().__init__(x, y)
 
-    # dt마다 호출 필요
-    def skill_counter(self):
-        if not self.skill_active and self.deal >= 70:
-            self.skill_active = True
-            self.deal = 0
-    
-    def attack(self, target):
-        if self.skill_active:
-            pass
+    def update(self, dt, enemies):
+        if self.skill_cooldown > 0:
+            self.skill_cooldown = self.skill_cooldamage - self.kill
+            self.skill_rante = self.kill / self.skill_cooldamage
+            if self.attack_cooldown > 0:
+                self.attack_cooldown -= dt
+                return None
+            else:
+                # 공격 가능한 상태입니다. 공격 로직을 구현해야 합니다. 아직 공격 범위는 확인 안 함
+                self.attack_cooldown = self.speed
+                return self.attack(enemies)
         else:
-            b = Bullet()
+            self.skill_cooldown = self.skill_cooldamage
+            self.skill_rate = 0
+            return self.skill(enemies)
+    
+
         
 def create_tower(type_name):
     if type_name == "archer":

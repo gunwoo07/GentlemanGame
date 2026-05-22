@@ -29,6 +29,7 @@ class enemy:
         self.type = type
         self.x = x
         self.y = y
+        self.hp = 100
         self.target_index = 1
         if type in enemy_type:
             self.hp = enemy_info[enemy_type.index(self.type)][0]

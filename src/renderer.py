@@ -2,7 +2,7 @@ import pygame
 from src.map import get_pos_lefttop, get_pos
 from src.tower import Archer, Cannon, Frost
 from src.config import *
-import stat
+
 
 class TowerButton:
     WIDTH = 120
@@ -51,11 +51,12 @@ class Renderer:
     def render(self, game_state):
         self.screen.fill((75, 0, 130)) # indigo blue
         self.draw_map(game_state['map'])
-        self.draw_stat(game_state['stat'])
         self.draw_path(game_state['path'])
-        self.draw_towers(game_state['towers'])
         self.draw_enemies(game_state['enemies'])
-
+        self.draw_bullets(game_state['bullets'])
+        self.draw_stat(game_state['stat'])
+        self.draw_towers(game_state['towers'])
+    
     def draw_map(self, game_map):
         for i in range(ROWS):
             for j in range(COLS):
@@ -68,25 +69,6 @@ class Renderer:
                 elif game_map[i][j] == 3:
                     pygame.draw.rect(self.screen, 'green', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
                 pygame.draw.rect(self.screen, 'black', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE), 1)
-
-    def draw_towers(self, towers):
-        check = True
-        for tower in towers:
-            tower.draw(self.screen)
-            if tower.is_selected:
-                self.is_selected_tower = True
-                tower.draw_range(self.screen)
-                start_x = MARGIN * 2
-                tower_info_y = MARGIN * 2 + MAP_HEIGHT + 15
-                tower_info_x = start_x + (TowerButton.WIDTH + 15) * 3
-                tower.draw_info(self.screen, tower_info_x, tower_info_y, self.font)
-                check = False
-        if check:
-            self.is_selected_tower = False
-
-    def draw_enemies(self, enemies):
-        for enemy in enemies:
-            enemy.draw(self.screen)
 
     def draw_stat(self, stat):
         # 1. 하단 스탯 창 배경 (검은색 상자)
@@ -120,12 +102,34 @@ class Renderer:
             end_pos = get_pos(path[i+1][0], path[i+1][1])
             pygame.draw.line(self.screen, 'white', (start_pos[0], start_pos[1]), (end_pos[0], end_pos[1]), 3)
 
+    def draw_towers(self, towers):
+        check = True
+        for tower in towers:
+            tower.draw(self.screen)
+            if tower.is_selected:
+                self.is_selected_tower = True
+                tower.draw_range(self.screen)
+                start_x = MARGIN * 2
+                tower_info_y = MARGIN * 2 + MAP_HEIGHT + 15
+                tower_info_x = start_x + (TowerButton.WIDTH + 15) * 3
+                tower.draw_info(self.screen, tower_info_x, tower_info_y, self.font)
+                check = False
+        if check:
+            self.is_selected_tower = False
+
+    def draw_enemies(self, enemies):
+        for enemy in enemies:
+            enemy.draw(self.screen)
+    def draw_bullets(self, bullets):
+        for bullet in bullets:
+            bullet.draw(self.screen)
 """
 {
     "map":
     "towers":
     "selected_tower":
     "enemies":
+    "bullets": 
     "stat": {
         "gold":
         "hp":
