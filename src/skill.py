@@ -1,3 +1,4 @@
+import pygame
 from src.map import *
 
 class InfiniteArrow:
@@ -19,7 +20,9 @@ class InfiniteArrow:
         #     return True
     def draw(self, screen):
         pygame.draw.circle(screen, 'blue', (self.pos.x, self.pos.y), TILE_SIZE/2)
-class Bomb(Skill):
+
+class Bomb:
     pass
-class Iceball(Skill):
+
+class Iceball:
     pass
