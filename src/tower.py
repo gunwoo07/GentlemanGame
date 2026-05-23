@@ -48,7 +48,7 @@ class Tower:
 
     def draw_info(self, screen, bx, by, font):
         tower_name = f"{self.type_name}(lv. {self.level}/{self.max_level})"
-        tower_info = f"대미지: {self.deal}   범위: {self.attack_range}   공격속도: {self.attack_speed}"
+        tower_info = f"대미지: {self.damage}   범위: {self.attack_range}   공격속도: {self.attack_speed}"
         tower_name_text = font.render(tower_name, True, 'white')
         tower_info_text = font.render(tower_info, True, 'white')
 
@@ -56,7 +56,7 @@ class Tower:
         screen.blit(tower_info_text, (bx, by + 20))
 
         # 스킬이 어느정도 준비되었는지 막대바로 pygame 그리기
-        skill_bar_width = 100
+        skill_bar_width = 200
         skill_bar_height = 10
         skill_bar_x = bx
         skill_bar_y = by + 50
@@ -113,9 +113,6 @@ class Tower:
             return Bullet(self, closest_enemy, self.damage, self.bullet_speed, self.color)
         return None
     
-    def level_up(self):
-        pass
-
 
 class Archer(Tower):
     type_name = "archer"
@@ -160,7 +157,7 @@ class Cannon(Tower):
     LEVEL_DATA = {
         1: {"damage": 40, "attack_range": 2.5*TILE_SIZE, "attack_speed": 0.70, "size_rate": 0.90, "cost": 60, "bullet_speed": 400, "color": (211, 211, 211)},
         2: {"damage": 42, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.75, "size_rate": 0.95, "cost": 30, "bullet_speed": 410, "color": (169, 169, 169)},
-        3: {"damage": 45, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.80, "size_rate": 1.00, "cost": 20, "bullet_spped": 420, "color": (128, 128, 128)}
+        3: {"damage": 45, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.80, "size_rate": 1.00, "cost": 20, "bullet_speed": 420, "color": (128, 128, 128)}
     }
     cost = LEVEL_DATA[1]["cost"]
 

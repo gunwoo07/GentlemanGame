@@ -1,51 +1,9 @@
 import pygame
+from src.config import *
 from src.map import get_pos_lefttop, get_pos
 from src.tower import Archer, Cannon, Frost
-from src.config import *
+from src.button import TowerButton, LevelupButton
 
-
-class TowerButton:
-    WIDTH = 120
-    HEIGHT = 80
-
-    def __init__(self, tower, bx, by):
-        self.tower = tower
-        self.bx = bx
-        self.by = by
-        self.rect = pygame.Rect(bx, by, self.WIDTH, self.HEIGHT)
-
-    def draw(self, screen, font):
-        # [버튼 배경 및 테두리]
-        pygame.draw.rect(screen, (60, 60, 60), self.rect)
-        pygame.draw.rect(screen, 'white', self.rect, 1)
-
-        # [타워 아이콘 - 왼쪽 배치]
-        pygame.draw.circle(screen, self.tower.LEVEL_DATA[1]["color"], (self.bx + 30, self.by + 40), 20)
-
-        # [텍스트 정보 - 오른쪽 배치]
-        name_text = font.render(self.tower.type_name, True, 'white')
-        cost_text = font.render(f"{self.tower.cost}G", True, 'yellow')
-
-        screen.blit(name_text, (self.bx + 60, self.by + 25))
-        screen.blit(cost_text, (self.bx + 60, self.by + 45))
-
-class LevelupButton:
-    WIDTH = 120
-    HEIGHT = 30
-
-    def __init__(self, tower, bx, by):
-        self.tower = tower
-        self.bx = bx
-        self.by = by
-        self.rect = pygame.Rect(bx, by, self.WIDTH, self.HEIGHT)
-    
-    def draw(self, screen, font):
-        pygame.draw.rect(screen, (60, 60, 60), self.rect)
-        pygame.draw.rect(screen, 'white', self.rect, 1)
-
-        levelup_text = font.render(f"레벨업 ({self.tower.LEVEL_DATA[self.tower.level+1]['cost']}G)", True, 'white')
-        screen.blit(levelup_text, (self.bx + 10, self.by + 5))
-    
 
 class Renderer:
     def __init__(self, screen):
