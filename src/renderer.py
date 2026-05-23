@@ -20,7 +20,7 @@ class TowerButton:
         pygame.draw.rect(screen, 'white', self.rect, 1)
 
         # [타워 아이콘 - 왼쪽 배치]
-        pygame.draw.circle(screen, self.tower.color, (self.bx + 30, self.by + 40), 20)
+        pygame.draw.circle(screen, self.tower.LEVEL_DATA[1]["color"], (self.bx + 30, self.by + 40), 20)
 
         # [텍스트 정보 - 오른쪽 배치]
         name_text = font.render(self.tower.type_name, True, 'white')

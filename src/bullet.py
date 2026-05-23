@@ -16,11 +16,16 @@ class Bullet:
     
     def move(self, dt):
         if (self.enemy_pos - self.pos).length() <= self.speed * dt:
-            self.pos = self.target_pos.copy()
-            self.enemy.hp -= self.damage
+            self.pos = self.enemy_pos.copy()
+            if self.enemy.hp < self.damage:
+                self.tower.kill += 1
+                self.enemy.hp = 0
+            else:
+                self.enemy.hp -= self.damage
+            self.tower.deal += self.damage
             self.is_finished = True
         else:
             self.pos += self.velocity * dt
     
     def draw(self, screen):
-        pygame.draw.circle(screen, self.collor, (self.pos.x, self.pos.y), self.size)
+        pygame.draw.circle(screen, self.color, (self.pos.x, self.pos.y), self.size)
