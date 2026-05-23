@@ -61,8 +61,10 @@ class Tower:
         skill_bar_x = bx
         skill_bar_y = by + 50
         pygame.draw.rect(screen, 'white', (skill_bar_x, skill_bar_y, skill_bar_width, skill_bar_height), 1)
-        if self.skill_rate >= 0:
+        if 0 <= self.skill_rate and self.skill_rate <= 1:
             inner_bar_width = skill_bar_width * self.skill_rate
+        elif self.skill_rate >= 1:
+            inner_bar_width = skill_bar_width
         else:
             inner_bar_width = 0
         pygame.draw.rect(screen, 'yellow', (skill_bar_x, skill_bar_y, inner_bar_width, skill_bar_height))
@@ -74,15 +76,21 @@ class Tower:
         # 스킬 쿨타임이 돌지 않았다면, 공격 쿨타임이 돌았다면 -> 공격
         pass
 
-    def level_up(self):
-        if self.level < self.max_level:
-            self.level += 1
-            self.damage = self.LEVEL_DATA[self.level]["damage"]
-            self.attack_range = self.LEVEL_DATA[self.level]["attack_range"]
-            self.attack_speed = self.LEVEL_DATA[self.level]["attack_speed"]
-            self.size_rate = self.LEVEL_DATA[self.level]["size_rate"]
-            self.bullet_speed = self.LEVEL_DATA[self.level]["bullet_speed"]
-            self.color = self.LEVEL_DATA[self.level]["color"]
+    # level이 max_level 보다 작은지 검사는 game_manager에서 해야 함
+    def level_up(self): 
+        self.level += 1
+        self.damage = self.LEVEL_DATA[self.level]["damage"]
+        self.attack_range = self.LEVEL_DATA[self.level]["attack_range"]
+        self.attack_speed = self.LEVEL_DATA[self.level]["attack_speed"]
+        self.size_rate = self.LEVEL_DATA[self.level]["size_rate"]
+        self.bullet_speed = self.LEVEL_DATA[self.level]["bullet_speed"]
+        self.color = self.LEVEL_DATA[self.level]["color"]
+    
+    # merge 조건을 game_manager에서 확인하고 이 함수를 실행해야 함
+    def merge(self, other):
+        self.level_up()
+        self.kill += other.kill
+        self.deal += other.deal
 
     def _get_closest_enemy(self, enemies):
         closest_enemy = None
@@ -94,14 +102,14 @@ class Tower:
                 closest_enemy = enemy
         return closest_enemy
     
-    # tower 마다 skill이 다르므로 skill 함수를 tower마다 구현해야 합니다.
+    # tower 마다 skill이 다르므로 skill 함수를 tower마다 구현해야 함
     def skill(self, enemies):
         pass
 
     def attack(self, enemies):
         closest_enemy = self._get_closest_enemy(enemies)
         if closest_enemy and (pygame.Vector2(closest_enemy.x, closest_enemy.y) - self.pos).length() <= self.attack_range:
-            # 공격 가능한 상태입니다. 총알을 생성하여 반환해야 합니다.
+            # 공격 가능한 상태, bullet instance 반환
             return Bullet(self, closest_enemy, self.damage, self.bullet_speed, self.color)
         return None
     

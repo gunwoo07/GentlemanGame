@@ -29,6 +29,23 @@ class TowerButton:
         screen.blit(name_text, (self.bx + 60, self.by + 25))
         screen.blit(cost_text, (self.bx + 60, self.by + 45))
 
+class LevelupButton:
+    WIDTH = 120
+    HEIGHT = 30
+
+    def __init__(self, tower, bx, by):
+        self.tower = tower
+        self.bx = bx
+        self.by = by
+        self.rect = pygame.Rect(bx, by, self.WIDTH, self.HEIGHT)
+    
+    def draw(self, screen, font):
+        pygame.draw.rect(screen, (60, 60, 60), self.rect)
+        pygame.draw.rect(screen, 'white', self.rect, 1)
+
+        levelup_text = font.render(f"레벨업 ({self.tower.LEVEL_DATA[self.tower.level+1]['cost']}G)", True, 'white')
+        screen.blit(levelup_text, (self.bx + 10, self.by + 5))
+    
 
 class Renderer:
     def __init__(self, screen):
@@ -42,12 +59,13 @@ class Renderer:
         btn_y = MARGIN * 2 + MAP_HEIGHT + 15
         btn_margin = 15
         
-        self.btn_list = [
-            TowerButton(Archer, start_x + (TowerButton.WIDTH + btn_margin) * 0, btn_y),
-            TowerButton(Cannon, start_x + (TowerButton.WIDTH + btn_margin) * 1, btn_y),
-            TowerButton(Frost, start_x + (TowerButton.WIDTH + btn_margin) * 2, btn_y)
-        ]
-
+        self.tower_btns = {
+            "archer": TowerButton(Archer, start_x + (TowerButton.WIDTH + btn_margin) * 0, btn_y),
+            "cannon": TowerButton(Cannon, start_x + (TowerButton.WIDTH + btn_margin) * 1, btn_y),
+            "frost": TowerButton(Frost, start_x + (TowerButton.WIDTH + btn_margin) * 2, btn_y)
+        }
+        self.levelup_btn = LevelupButton(None, 0, 0)  # 초기화는 나중에 tower가 선택될 때 이루어짐
+        
     def render(self, game_state):
         self.screen.fill((75, 0, 130)) # indigo blue
         self.draw_map(game_state['map'])
@@ -76,7 +94,7 @@ class Renderer:
         pygame.draw.rect(self.screen, 'black', stat_rect)
         
         # 2. 버튼 그리기
-        for btn in self.btn_list:
+        for btn in self.tower_btns.values():
             btn.draw(self.screen, self.font)
             
         # 3. 하단 게임 정보 (버튼들 바로 아래에 한 줄로 표시)
@@ -113,6 +131,8 @@ class Renderer:
                 tower_info_y = MARGIN * 2 + MAP_HEIGHT + 15
                 tower_info_x = start_x + (TowerButton.WIDTH + 15) * 3
                 tower.draw_info(self.screen, tower_info_x, tower_info_y, self.font)
+                self.levelup_btn = LevelupButton(tower, tower_info_x, tower_info_y + 70)
+                self.levelup_btn.draw(self.screen, self.font)
                 check = False
         if check:
             self.is_selected_tower = False
