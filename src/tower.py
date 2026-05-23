@@ -1,63 +1,10 @@
 import pygame
 from src.map import *
-
-### 미완성입니다. 일단은 타워의 위치와 종류만 저장하는 형태로 구현했습니다. 공격과 스킬은 나중에 추가할 예정입니다.
-class Bullet:
-    size = 5
-    is_finished = False
-    def __init__(self, tower_pos, enemy, damage, speed, color):
-        self.tower_pos = tower_pos.copy()
-        self.enemy = enemy
-        self.target_pos = pygame.Vector2(enemy.x, enemy.y)
-        self.pos = tower_pos.copy()
-        self.projectile = self.target_pos - self.tower_pos
-        self.damage = damage
-        self.speed = speed
-        self.velocity = self.projectile.normalize() * self.speed
-        self.color = color
-    def move(self, dt):
-        if (self.target_pos - self.pos).length() <= self.speed * dt:
-            self.pos = self.target_pos
-            self.enemy.hp -= self.damage
-            self.is_finished = True
-        else:
-            self.pos += self.velocity * dt
-            
-    def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (self.pos.x, self.pos.y), self.size)
-
-class Skill:
-    def __init__(self):
-        pass
-    def move(self, dt, enemies):
-        pass
-
-class InfiniteArrow(Skill):
-    def __init__(self, tower_pos, target_pos, damage, speed):
-        self.tower_pos = tower_pos
-        self.target_pos = target_pos
-        self.pos = tower_pos
-        self.projectile = target_pos - tower_pos
-        self.damage = damage
-        self.speed = speed
-        self.velocity = self.projectile.normalize() * self.speed
-    def move(self, dt, enemies): # True 리탄하면 요소 삭제
-        pass
-        # self.pos += self.velocity * dt
-        # for enemy in enemies:
-        #     if (pygame.Vector2(enemy.x, enemy.y) - self.pos).length() <= TILE_SIZE:
-        #         enemy.hp -= self.damage
-        # if self.pos.x < MARGIN or self.pos.x > MARGIN+MAP_HEIGHT or self.pos.y < 0 or self.pos.y > HEIGHT:
-        #     return True
-    def draw(self, screen):
-        pygame.draw.circle(screen, 'blue', (self.pos.x, self.pos.y), TILE_SIZE/2)
-class Bomb(Skill):
-    pass
-class Iceball(Skill):
-    pass
+from src.bullet import Bullet
+from src.skill import InfiniteArrow, Bomb, Iceball
 
 class Tower:
-    # example(archer)
+    # 타워마다 다르게 설정해야 함!!!example(archer)
     damage = 15
     range = 3*TILE_SIZE
     speed = 0.5 # seconds
