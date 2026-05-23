@@ -43,32 +43,6 @@ class Tower:
         pygame.draw.rect(screen, 'blue', self.rect)
         pygame.draw.circle(screen, self.color, (self.pos.x, self.pos.y), TILE_SIZE/2*self.size_rate)
     
-    def draw_range(self, screen):
-        pygame.draw.circle(screen, 'white', (self.pos.x, self.pos.y), self.attack_range, 1)
-
-    def draw_info(self, screen, bx, by, font):
-        tower_name = f"{self.type_name}(lv. {self.level}/{self.max_level})"
-        tower_info = f"대미지: {self.damage}   범위: {self.attack_range}   공격속도: {self.attack_speed}"
-        tower_name_text = font.render(tower_name, True, 'white')
-        tower_info_text = font.render(tower_info, True, 'white')
-
-        screen.blit(tower_name_text, (bx, by))
-        screen.blit(tower_info_text, (bx, by + 20))
-
-        # 스킬이 어느정도 준비되었는지 막대바로 pygame 그리기
-        skill_bar_width = 200
-        skill_bar_height = 10
-        skill_bar_x = bx
-        skill_bar_y = by + 50
-        pygame.draw.rect(screen, 'white', (skill_bar_x, skill_bar_y, skill_bar_width, skill_bar_height), 1)
-        if 0 <= self.skill_rate and self.skill_rate <= 1:
-            inner_bar_width = skill_bar_width * self.skill_rate
-        elif self.skill_rate >= 1:
-            inner_bar_width = skill_bar_width
-        else:
-            inner_bar_width = 0
-        pygame.draw.rect(screen, 'yellow', (skill_bar_x, skill_bar_y, inner_bar_width, skill_bar_height))
-
     def update(self, dt, enemies): # bullet(또는 skill) instance를 return
         # 스킬 쿨타임이 업데이트
         # 공격 쿨타임 업데이트

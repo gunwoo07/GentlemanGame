@@ -23,8 +23,22 @@ class Renderer:
             "frost": TowerButton(Frost, start_x + (TowerButton.WIDTH + btn_margin) * 2, btn_y)
         }
         self.levelup_btn = LevelupButton(None, 0, 0)  # 초기화는 나중에 tower가 선택될 때 이루어짐
-        
+    
+    def check_is_tower_selected(self, towers):
+        check = False
+        for tower in towers:
+            if tower.is_selected:
+                check = True
+                break
+        if check:
+            self.is_selected_tower = True
+        else:
+            self.is_selected_tower = False
+
     def render(self, game_state):
+        # 선택된 타워가 있는지 확인
+        self.check_is_tower_selected(game_state['towers'])
+        
         self.screen.fill((75, 0, 130)) # indigo blue
         self.draw_map(game_state['map'])
         self.draw_path(game_state['path'])
@@ -32,7 +46,7 @@ class Renderer:
         self.draw_bullets(game_state['bullets'])
         self.draw_stat(game_state['stat'])
         self.draw_towers(game_state['towers'])
-    
+
     def draw_map(self, game_map):
         for i in range(ROWS):
             for j in range(COLS):
@@ -44,6 +58,7 @@ class Renderer:
                     pygame.draw.rect(self.screen, 'red', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
                 elif game_map[i][j] == 3:
                     pygame.draw.rect(self.screen, 'green', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
+                # 테두리
                 pygame.draw.rect(self.screen, 'black', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE), 1)
 
     def draw_stat(self, stat):
@@ -79,25 +94,46 @@ class Renderer:
             pygame.draw.line(self.screen, 'white', (start_pos[0], start_pos[1]), (end_pos[0], end_pos[1]), 3)
 
     def draw_towers(self, towers):
-        check = True
         for tower in towers:
             tower.draw(self.screen)
             if tower.is_selected:
-                self.is_selected_tower = True
-                tower.draw_range(self.screen)
+                # attack range 그리기
+                pygame.draw.circle(self.screen, 'white', (tower.pos.x, tower.pos.y), tower.attack_range, 1)
+
+                # tower 정보 적기
                 start_x = MARGIN * 2
                 tower_info_y = MARGIN * 2 + MAP_HEIGHT + 15
                 tower_info_x = start_x + (TowerButton.WIDTH + 15) * 3
-                tower.draw_info(self.screen, tower_info_x, tower_info_y, self.font)
+
+                tower_name_text = self.font.render(f'{tower.type_name}(lv. {tower.level}/{tower.max_level})', True, 'white')
+                tower_info_text = self.font.render(f'대미지: {tower.damage}   범위: {tower.attack_range/TILE_SIZE:.1f}   공격속도: {tower.attack_speed}', True, 'white')
+
+                self.screen.blit(tower_name_text, (tower_info_x, tower_info_y))
+                self.screen.blit(tower_info_text, (tower_info_x, tower_info_y+20))
+
+                # 스킬 준비 상태 바
+                skill_bar_width = 200
+                skill_bar_height = 10
+                skill_bar_x = tower_info_x
+                skill_bar_y = tower_info_y + 50
+                pygame.draw.rect(self.screen, 'white', (skill_bar_x, skill_bar_y, skill_bar_width, skill_bar_height), 1)
+                if 0 <= tower.skill_rate <= 1:
+                    inner_bar_width = skill_bar_width * tower.skill_rate
+                elif tower.skill_rate > 1:
+                    inner_bar_width = skill_bar_width
+                else:
+                    inner_bar_width = 0
+                pygame.draw.rect(self.screen, 'yellow', (skill_bar_x, skill_bar_y, inner_bar_width, skill_bar_height))
+
+                # 레벨업 버튼
                 self.levelup_btn = LevelupButton(tower, tower_info_x, tower_info_y + 70)
                 self.levelup_btn.draw(self.screen, self.font)
-                check = False
-        if check:
-            self.is_selected_tower = False
+
 
     def draw_enemies(self, enemies):
         for enemy in enemies:
             enemy.draw(self.screen)
+
     def draw_bullets(self, bullets):
         for bullet in bullets:
             bullet.draw(self.screen)
