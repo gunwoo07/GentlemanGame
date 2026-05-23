@@ -23,7 +23,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.shortest_path = find_shortest_path(game_map)
-        self.enemy_list = [enemy("normal", *get_pos(0, 8))]*7
+        self.enemy_list = []
         self.tower_list = [Cannon(7, 8)]
         self.tower_list[0].is_selected = True
         self.bullet_list = []
@@ -43,7 +43,6 @@ class Game:
         for bullet in self.bullet_list:
             if bullet.is_finished:
                 self.bullet_list.remove(bullet)
-            print("bullet is here")
             bullet.move(dt)
     
     def handle_event(self):
