@@ -84,12 +84,12 @@ class Tower:
 
     def attack(self, enemies):
         # 가장 멀리간 enemy를 공격
-        targeted_enemy = None
+        target_enemy = None
         for enemy in enemies[::-1]:
             if self._check_enemy_in_range(enemy):
-                targeted_enemy = enemy
-        if targeted_enemy:
-            return Bullet(self, targeted_enemy, self.damage, self.bullet_speed, self.color)
+                target_enemy = enemy
+        if target_enemy:
+            return Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color)
         return None
     
 
@@ -104,32 +104,63 @@ class Archer(Tower):
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.skill_coolkill = 10
-        self.skill_cooldown = self.skill_coolkill
+        self.skill_cooltime = 4
+        self.skill_cooldown = self.skill_cooltime
 
     def update(self, dt, enemies):
-        if self.skill_cooldown > 0:
-            self.skill_cooldown = self.skill_coolkill-self.kill
-            self.skill_rate = self.kill / self.skill_coolkill
-            if self.attack_cooldown > 0:
-                self.attack_cooldown -= dt
-                return None
-            else:
-                # 공격 가능한 상태입니다. 공격 로직을 구현해야 합니다. 아직 공격 범위는 확인 안 함
-                self.attack_cooldown = self.attack_speed
-                return self.attack(enemies)
+        if self.skill_cooldown > 0 and self.attack_cooldown > 0:
+            self.skill_cooldown -= dt
+            self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
+            self.attack_cooldown -= dt
+            return (None, None)
         else:
-            self.skill_cooldown = self.skill_coolkill
-            self.skill_rate = 0
-            return self.skill(enemies)
+            target_enemy = None
+            for enemy in enemies[::-1]:
+                if self._check_enemy_in_range(enemy):
+                    target_enemy = enemy
+            if self.skill_cooldown > 0 and self.attack_cooldown <= 0:
+                self.skill_cooldown -= dt
+                self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
+                if target_enemy:
+                    self.attack_cooldown = self.attack_speed
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), None)
+                else:
+                    return (None, None)
+            elif self.skill_cooldown <= 0 and self.attack_cooldown > 0:
+                self.attack_cooldown -= dt
+                if target_enemy:
+                    self.skill_cooldown = self.skill_cooltime
+                    self.skill_rate = 0
+                    return (None, InfiniteArrow(self, target_enemy))
+                else:
+                    return (None, None)
+            else:
+                if target_enemy:
+                    self.skill_cooldown = self.skill_cooltime
+                    self.skill_rate = 0
+                    self.attack_cooldown = self.attack_speed
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), InfiniteArrow(self, target_enemy))
+                else:
+                    return (None, None)
+        # if self.skill_cooldown > 0:
+        #     self.skill_cooldown = self.skill_coolkill-self.kill
+        #     self.skill_rate = self.kill / self.skill_coolkill
+        #     if self.attack_cooldown > 0:
+        #         self.attack_cooldown -= dt
+        #         return None
+        #     else:
+        #         # 공격 가능한 상태
+        #         self.attack_cooldown = self.attack_speed
+        #         return self.attack(enemies)
+        # else:
+        #     s = self.skill(enemies)
+        #     if s:
+        #         self.skill_cooldown = self.skill_coolkill
+        #         self.skill_rate = 0
+        #         return s
+        #     else:
+        #         return None
     
-    def skill(self, enemies):
-        return None
-        # closest_enemy = self._get_closest_enemy(enemies)
-        # if closest_enemy:
-        #     return InfiniteArrow(self.pos, pygame.Vector2(closest_enemy.x, closest_enemy.y), self.damage, self.bullet_speed)
-        # return None
-
 
 class Cannon(Tower):
     type_name = "cannon"
@@ -142,25 +173,44 @@ class Cannon(Tower):
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.skill_cooltime = 15
+        self.skill_cooltime = 5
         self.skill_cooldown = self.skill_cooltime
 
     def update(self, dt, enemies):
-        if self.skill_cooldown > 0:
+        if self.skill_cooldown > 0 and self.attack_cooldown > 0:
             self.skill_cooldown -= dt
             self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
-            if self.attack_cooldown > 0:
-                self.attack_cooldown -= dt
-                return None
-            else:
-                # 공격 가능한 상태입니다. 공격 로직을 구현해야 합니다. 아직 공격 범위는 확인 안 함
-                self.attack_cooldown = self.attack_speed
-                return self.attack(enemies)
+            self.attack_cooldown -= dt
+            return (None, None)
         else:
-            self.skill_cooldown = self.skill_cooltime
-            self.skill_rate = 0
-            return self.skill(enemies)
-    
+            target_enemy = None
+            for enemy in enemies[::-1]:
+                if self._check_enemy_in_range(enemy):
+                    target_enemy = enemy
+            if self.skill_cooldown > 0 and self.attack_cooldown <= 0:
+                self.skill_cooldown -= dt
+                self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
+                if target_enemy:
+                    self.attack_cooldown = self.attack_speed
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), None)
+                else:
+                    return (None, None)
+            elif self.skill_cooldown <= 0 and self.attack_cooldown > 0:
+                self.attack_cooldown -= dt
+                if target_enemy:
+                    self.skill_cooldown = self.skill_cooltime
+                    self.skill_rate = 0
+                    return (None, Bomb(self, target_enemy))
+                else:
+                    return (None, None)
+            else:
+                if target_enemy:
+                    self.skill_cooldown = self.skill_cooltime
+                    self.skill_rate = 0
+                    self.attack_cooldown = self.attack_speed
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), Bomb(self, target_enemy))
+                else:
+                    return (None, None)
 
 class Frost(Tower):
     type_name = "frost"
@@ -173,24 +223,44 @@ class Frost(Tower):
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.skill_cooldamage = 60
-        self.skill_cooldown = self.skill_cooldamage
+        self.skill_cooltime = 3
+        self.skill_cooldown = self.skill_cooltime
 
     def update(self, dt, enemies):
-        if self.skill_cooldown > 0:
-            self.skill_cooldown = self.skill_cooldamage - self.kill
-            self.skill_rante = self.kill / self.skill_cooldamage
-            if self.attack_cooldown > 0:
-                self.attack_cooldown -= dt
-                return None
-            else:
-                # 공격 가능한 상태입니다. 공격 로직을 구현해야 합니다. 아직 공격 범위는 확인 안 함
-                self.attack_cooldown = self.attack_speed
-                return self.attack(enemies)
+        if self.skill_cooldown > 0 and self.attack_cooldown > 0:
+            self.skill_cooldown -= dt
+            self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
+            self.attack_cooldown -= dt
+            return (None, None)
         else:
-            self.skill_cooldown = self.skill_cooldamage
-            self.skill_rate = 0
-            return self.skill(enemies)
+            target_enemy = None
+            for enemy in enemies[::-1]:
+                if self._check_enemy_in_range(enemy):
+                    target_enemy = enemy
+            if self.skill_cooldown > 0 and self.attack_cooldown <= 0:
+                self.skill_cooldown -= dt
+                self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
+                if target_enemy:
+                    self.attack_cooldown = self.attack_speed
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), None)
+                else:
+                    return (None, None)
+            elif self.skill_cooldown <= 0 and self.attack_cooldown > 0:
+                self.attack_cooldown -= dt
+                if target_enemy:
+                    self.skill_cooldown = self.skill_cooltime
+                    self.skill_rate = 0
+                    return (None, Iceball(self, target_enemy))
+                else:
+                    return (None, None)
+            else:
+                if target_enemy:
+                    self.skill_cooldown = self.skill_cooltime
+                    self.skill_rate = 0
+                    self.attack_cooldown = self.attack_speed
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), Iceball(self, target_enemy))
+                else:
+                    return (None, None)
     
    
 def create_tower(type_name, x, y):

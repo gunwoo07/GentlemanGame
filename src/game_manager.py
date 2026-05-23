@@ -24,27 +24,34 @@ class Game:
         self.running = True
         self.shortest_path = find_shortest_path(game_map)
         self.enemy_list = []
-        self.tower_list = [Cannon(7, 8)]
+        self.tower_list = [Frost(7, 8)]
         self.tower_list[0].is_selected = True
         self.bullet_list = []
+        self.skill_list = []
         self.wave = 0
 
     def update(self, dt):
         self.shortest_path = find_shortest_path(game_map)
         
+        self.enemy_list = [e for e in self.enemy_list if e.hp > 0]
         for e in self.enemy_list:
             e.move(self.shortest_path, dt)
         
         for tower in self.tower_list:
             result = tower.update(dt, self.enemy_list)
-            if result:
-                self.bullet_list.append(result)
+            if result[0]:
+                self.bullet_list.append(result[0])
+            if result[1]:
+                self.skill_list.append(result[1])
 
+        self.bullet_list = [b for b in self.bullet_list if not b.is_finished]
         for bullet in self.bullet_list:
-            if bullet.is_finished:
-                self.bullet_list.remove(bullet)
             bullet.move(dt)
-    
+        
+        self.skill_list = [s for s in self.skill_list if not s.is_finished]
+        for skill in self.skill_list:
+            skill.move(dt, self.enemy_list)
+
     def handle_event(self):
 
         for event in pygame.event.get():
@@ -85,6 +92,7 @@ class Game:
                 "enemies":self.enemy_list,
                 "path":self.shortest_path,
                 "bullets": self.bullet_list,
+                "skills": self.skill_list,
                 "stat": {
                     "gold" : 0,
                     "hp" : 100,

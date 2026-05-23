@@ -44,6 +44,7 @@ class Renderer:
         self.draw_path(game_state['path'])
         self.draw_enemies(game_state['enemies'])
         self.draw_bullets(game_state['bullets'])
+        self.draw_skills(game_state['skills'])
         self.draw_stat(game_state['stat'])
         self.draw_towers(game_state['towers'])
 
@@ -137,6 +138,11 @@ class Renderer:
     def draw_bullets(self, bullets):
         for bullet in bullets:
             bullet.draw(self.screen)
+    
+    def draw_skills(self, skills):
+        for skill in skills:
+            skill.draw(self.screen)
+            
 """
 {
     "map":
