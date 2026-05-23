@@ -76,15 +76,20 @@ class Tower:
                 closest_enemy = enemy
         return closest_enemy
     
+    def _check_enemy_in_range(self, enemy):
+        return (pygame.Vector2(enemy.x, enemy.y) - self.pos).length() <= self.attack_range
     # tower 마다 skill이 다르므로 skill 함수를 tower마다 구현해야 함
     def skill(self, enemies):
         pass
 
     def attack(self, enemies):
-        closest_enemy = self._get_closest_enemy(enemies)
-        if closest_enemy and (pygame.Vector2(closest_enemy.x, closest_enemy.y) - self.pos).length() <= self.attack_range:
-            # 공격 가능한 상태, bullet instance 반환
-            return Bullet(self, closest_enemy, self.damage, self.bullet_speed, self.color)
+        # 가장 멀리간 enemy를 공격
+        targeted_enemy = None
+        for enemy in enemies[::-1]:
+            if self._check_enemy_in_range(enemy):
+                targeted_enemy = enemy
+        if targeted_enemy:
+            return Bullet(self, targeted_enemy, self.damage, self.bullet_speed, self.color)
         return None
     
 
