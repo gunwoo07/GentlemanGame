@@ -40,7 +40,7 @@ class Game:
             if e.hp <= 0:
                 self.gold += e.gold
                 self.enemy_list.remove(e)
-            e.move(self.shortest_path, dt)
+            e.move(dt)
         
         for tower in self.tower_list:
             result = tower.update(dt, self.enemy_list)
