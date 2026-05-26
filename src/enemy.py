@@ -3,9 +3,9 @@ from src.map import *
 from src.config import *
 
 enemy_info = [
-    (100, 29, 50), # hp, speed, gold,  / normal
-    (100, 45, 70), # fast
-    (200, 40, 100), # strong
+    (100, 15, 50), # hp, speed, gold,  / normal
+    (100, 25, 70), # fast
+    (200, 10, 100), # strong
     (1000, 30, 500) # boss
 ]
 
@@ -30,9 +30,11 @@ class enemy:
         self.x = x
         self.y = y
         self.hp = 100
+        self.max_hp = 100
         self.target_index = 1
         if type in enemy_type:
             self.hp = enemy_info[enemy_type.index(self.type)][0]
+            self.max_hp = enemy_info[enemy_type.index(self.type)][0]
             self.speed = enemy_info[enemy_type.index(self.type)][1]
             self.gold = enemy_info[enemy_type.index(self.type)][2]
 
@@ -78,14 +80,38 @@ class enemy:
 
 
     def draw(self, screen):
+        # 적 몸통
         if self.type == "normal":
-            pygame.draw.circle(screen, "green", (self.x, self.y), TILE_SIZE/2.2)
-        if self.type == "fast":
-            pygame.draw.circle(screen, "yellow", (self.x, self.y), TILE_SIZE/2.5)
-        if self.type == "strong":
-            pygame.draw.circle(screen, "red", (self.x, self.y), TILE_SIZE/2)
-        if self.type == "boss":
-            pygame.draw.circle(screen, "red", (self.x, self.y), TILE_SIZE/2 + 10)
+            radius = int(TILE_SIZE / 2.2)
+            color = "green"
+        elif self.type == "fast":
+            radius = int(TILE_SIZE / 2.5)
+            color = "yellow"
+        elif self.type == "strong":
+            radius = int(TILE_SIZE / 2)
+            color = "red"
+        elif self.type == "boss":
+            radius = int(TILE_SIZE / 2 + 10)
+            color = "red"
+
+        pygame.draw.circle(screen, color, (int(self.x), int(self.y)), radius)
+
+        # 체력 바
+        bar_width = radius * 2
+        bar_height = 6
+        bar_x = int(self.x - bar_width / 2)
+        bar_y = int(self.y - radius - 12)
+
+        hp_ratio = max(0, self.hp) / self.max_hp
+        hp_fill_width = int(bar_width * hp_ratio)
+
+        # 배경 바
+        pygame.draw.rect(screen, (40, 40, 40), (bar_x, bar_y, bar_width, bar_height))
+        # 체력 바
+        pygame.draw.rect(screen, (0, 220, 0), (bar_x, bar_y, hp_fill_width, bar_height))
+        # 테두리
+        pygame.draw.rect(screen, (255, 255, 255), (bar_x, bar_y, bar_width, bar_height), 1)
+
 
         
 

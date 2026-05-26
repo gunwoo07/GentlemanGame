@@ -29,12 +29,16 @@ class Game:
         self.bullet_list = []
         self.skill_list = []
         self.wave = 0
+        self.gold = 100
 
     def update(self, dt):
         self.shortest_path = find_shortest_path(game_map)
+    
         
-        self.enemy_list = [e for e in self.enemy_list if e.hp > 0]
         for e in self.enemy_list:
+            if e.hp <= 0:
+                self.gold += e.gold
+                self.enemy_list.remove(e)
             e.move(self.shortest_path, dt)
         
         for tower in self.tower_list:
@@ -62,7 +66,7 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.wave += 1
-                    pygame.time.set_timer(ENEMY_SPAWN, 1000)
+                    pygame.time.set_timer(ENEMY_SPAWN, 3000)
 
             elif event.type == ENEMY_SPAWN:
                 if self.wave <= len(wave_list):
@@ -94,7 +98,7 @@ class Game:
                 "bullets": self.bullet_list,
                 "skills": self.skill_list,
                 "stat": {
-                    "gold" : 0,
+                    "gold" : self.gold,
                     "hp" : 100,
                     "wave" : 1,
                     "max_wave" : 5 
