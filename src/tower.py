@@ -67,15 +67,10 @@ class Tower:
         self.deal += other.deal
         self.skill_rate += other.skill_rate
 
-    def _get_closest_enemy(self, enemies):
-        closest_enemy = None
-        min_distance = float('inf')
-        for enemy in enemies:
-            distance = (pygame.Vector2(enemy.x, enemy.y) - self.pos).length()
-            if distance < min_distance:
-                min_distance = distance
-                closest_enemy = enemy
-        return closest_enemy
+    def _find_enemy(self, enemies):
+        enemy_distances = [(e, e.left_distance()) for e in enemies]
+        enemy_distances.sort(key=lambda x: x[1])
+        return enemy_distances[0][0] if enemy_distances else None
     
     def _check_enemy_in_range(self, enemy):
         return (pygame.Vector2(enemy.x, enemy.y) - self.pos).length() <= self.attack_range
@@ -86,11 +81,8 @@ class Tower:
 
     def attack(self, enemies):
         # 가장 멀리간 enemy를 공격
-        target_enemy = None
-        for enemy in enemies[::-1]:
-            if self._check_enemy_in_range(enemy):
-                target_enemy = enemy
-        if target_enemy:
+        target_enemy = self._find_enemy(enemies)
+        if target_enemy and self._check_enemy_in_range(target_enemy):
             return Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color)
         return None
     

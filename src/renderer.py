@@ -11,7 +11,7 @@ class Renderer:
         self.title_font = pygame.font.SysFont("malgungothic", 20)
         self.font = pygame.font.SysFont("malgungothic", 16)
         self.small_font = pygame.font.SysFont("malgungothic", 12)
-        self.is_selected_tower = False # 타워가 선택되었는지 여부
+        self.selected_tower = None
         # 버튼 시작 위치 및 간격 계산
         start_x = MARGIN * 2
         btn_y = MARGIN * 2 + MAP_HEIGHT + 15
@@ -25,15 +25,11 @@ class Renderer:
         self.levelup_btn = LevelupButton(None, 0, 0)  # 초기화는 나중에 tower가 선택될 때 이루어짐
     
     def check_is_tower_selected(self, towers):
-        check = False
+        self.selected_tower = None
         for tower in towers:
             if tower.is_selected:
-                check = True
+                self.selected_tower = tower
                 break
-        if check:
-            self.is_selected_tower = True
-        else:
-            self.is_selected_tower = False
 
     def render(self, game_state):
         # 선택된 타워가 있는지 확인
@@ -42,11 +38,11 @@ class Renderer:
         self.screen.fill((75, 0, 130)) # indigo blue
         self.draw_map(game_state['map'])
         self.draw_path(game_state['path'])
+        self.draw_towers(game_state['towers'])
         self.draw_enemies(game_state['enemies'])
         self.draw_bullets(game_state['bullets'])
         self.draw_skills(game_state['skills'])
         self.draw_stat(game_state['stat'])
-        self.draw_towers(game_state['towers'])
 
     def draw_map(self, game_map):
         for i in range(ROWS):
@@ -63,24 +59,71 @@ class Renderer:
                 pygame.draw.rect(self.screen, 'black', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE), 1)
 
     def draw_stat(self, stat):
-        # 1. 하단 스탯 창 배경 (검은색 상자)
-        stat_rect = (MARGIN, MARGIN*2 + MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT)
-        pygame.draw.rect(self.screen, 'black', stat_rect)
-        
-        # 2. 버튼 그리기
-        for btn in self.tower_btns.values():
-            btn.draw(self.screen, self.font)
-            
-        # 3. 하단 게임 정보 (버튼들 바로 아래에 한 줄로 표시)
-        start_x = MARGIN * 2
-        btn_y = MARGIN * 2 + MAP_HEIGHT + 15
-        info_y = btn_y + TowerButton.HEIGHT + 20
-        status_info = f"골드: {stat['gold']}   HP: {stat['hp']}   웨이브: {stat['wave']}/{stat['max_wave']}"
-        stat_text = self.title_font.render(status_info, True, 'white')
-        
-        self.screen.blit(stat_text, (start_x, info_y))
+        if self.selected_tower:
+            # attack range 그리기
+            pygame.draw.circle(self.screen, 'white', (self.selected_tower.pos.x, self.selected_tower.pos.y), self.selected_tower.attack_range, 1)
+            # 1. 하단 스탯 창 배경 (검은색 상자)
+            stat_rect = (MARGIN, MARGIN*2 + MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT)
+            pygame.draw.rect(self.screen, 'black', stat_rect)
+                
+            # 2. 버튼 그리기
+            for btn in self.tower_btns.values():
+                btn.draw(self.screen, self.font)
+                    
+            # 3. 하단 게임 정보 (버튼들 바로 아래에 한 줄로 표시)
+            start_x = MARGIN * 2
+            btn_y = MARGIN * 2 + MAP_HEIGHT + 15
+            info_y = btn_y + TowerButton.HEIGHT + 20
+            status_info = f"골드: {stat['gold']}   HP: {stat['hp']}   웨이브: {stat['wave']}/{stat['max_wave']}"
+            stat_text = self.title_font.render(status_info, True, 'white')
+                
+            self.screen.blit(stat_text, (start_x, info_y))
 
-        if not self.is_selected_tower:
+            # tower 정보 적기
+            start_x = MARGIN * 2
+            tower_info_y = MARGIN * 2 + MAP_HEIGHT + 15
+            tower_info_x = start_x + (TowerButton.WIDTH + 15) * 3
+
+            tower_name_text = self.font.render(f'{self.selected_tower.type_name}(lv. {self.selected_tower.level}/{self.selected_tower.max_level})', True, 'white')
+            tower_info_text = self.font.render(f'대미지: {self.selected_tower.damage}   범위: {self.selected_tower.attack_range/TILE_SIZE:.1f}   공격속도: {self.selected_tower.attack_speed}', True, 'white')
+
+            self.screen.blit(tower_name_text, (tower_info_x, tower_info_y))
+            self.screen.blit(tower_info_text, (tower_info_x, tower_info_y+20))
+
+            # 스킬 준비 상태 바
+            skill_bar_width = 200
+            skill_bar_height = 10
+            skill_bar_x = tower_info_x
+            skill_bar_y = tower_info_y + 50
+            pygame.draw.rect(self.screen, 'white', (skill_bar_x, skill_bar_y, skill_bar_width, skill_bar_height), 1)
+            if 0 <= self.selected_tower.skill_rate <= 1:
+                inner_bar_width = skill_bar_width * self.selected_tower.skill_rate
+            elif self.selected_tower.skill_rate > 1:
+                inner_bar_width = skill_bar_width
+            else:
+                inner_bar_width = 0
+            pygame.draw.rect(self.screen, 'yellow', (skill_bar_x, skill_bar_y, inner_bar_width, skill_bar_height))
+
+            # 레벨업 버튼
+            self.levelup_btn = LevelupButton(self.selected_tower, tower_info_x, tower_info_y + 70)
+            self.levelup_btn.draw(self.screen, self.font)
+        else:
+            # 1. 하단 스탯 창 배경 (검은색 상자)
+            stat_rect = (MARGIN, MARGIN*2 + MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT)
+            pygame.draw.rect(self.screen, 'black', stat_rect)
+            
+            # 2. 버튼 그리기
+            for btn in self.tower_btns.values():
+                btn.draw(self.screen, self.font)
+                
+            # 3. 하단 게임 정보 (버튼들 바로 아래에 한 줄로 표시)
+            start_x = MARGIN * 2
+            btn_y = MARGIN * 2 + MAP_HEIGHT + 15
+            info_y = btn_y + TowerButton.HEIGHT + 20
+            status_info = f"골드: {stat['gold']}   HP: {stat['hp']}   웨이브: {stat['wave']}/{stat['max_wave']}"
+            stat_text = self.title_font.render(status_info, True, 'white')
+            
+            self.screen.blit(stat_text, (start_x, info_y))
             text1 = self.font.render("웨이브 시작: 스페이스 바", True, 'white')
             text2 = self.font.render("타워 선택/배치/합체: 좌클릭", True, 'white')
             text3 = self.font.render("선택 취소: 우클릭", True, 'white')
@@ -89,6 +132,7 @@ class Renderer:
             self.screen.blit(text2, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 40))
             self.screen.blit(text3, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 60))
             self.screen.blit(text4, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 80))
+
 
     def draw_path(self, path):
         for i in range(len(path) - 1):
@@ -99,39 +143,6 @@ class Renderer:
     def draw_towers(self, towers):
         for tower in towers:
             tower.draw(self.screen)
-            if tower.is_selected:
-                # attack range 그리기
-                pygame.draw.circle(self.screen, 'white', (tower.pos.x, tower.pos.y), tower.attack_range, 1)
-
-                # tower 정보 적기
-                start_x = MARGIN * 2
-                tower_info_y = MARGIN * 2 + MAP_HEIGHT + 15
-                tower_info_x = start_x + (TowerButton.WIDTH + 15) * 3
-
-                tower_name_text = self.font.render(f'{tower.type_name}(lv. {tower.level}/{tower.max_level})', True, 'white')
-                tower_info_text = self.font.render(f'대미지: {tower.damage}   범위: {tower.attack_range/TILE_SIZE:.1f}   공격속도: {tower.attack_speed}', True, 'white')
-
-                self.screen.blit(tower_name_text, (tower_info_x, tower_info_y))
-                self.screen.blit(tower_info_text, (tower_info_x, tower_info_y+20))
-
-                # 스킬 준비 상태 바
-                skill_bar_width = 200
-                skill_bar_height = 10
-                skill_bar_x = tower_info_x
-                skill_bar_y = tower_info_y + 50
-                pygame.draw.rect(self.screen, 'white', (skill_bar_x, skill_bar_y, skill_bar_width, skill_bar_height), 1)
-                if 0 <= tower.skill_rate <= 1:
-                    inner_bar_width = skill_bar_width * tower.skill_rate
-                elif tower.skill_rate > 1:
-                    inner_bar_width = skill_bar_width
-                else:
-                    inner_bar_width = 0
-                pygame.draw.rect(self.screen, 'yellow', (skill_bar_x, skill_bar_y, inner_bar_width, skill_bar_height))
-
-                # 레벨업 버튼
-                self.levelup_btn = LevelupButton(tower, tower_info_x, tower_info_y + 70)
-                self.levelup_btn.draw(self.screen, self.font)
-
 
     def draw_enemies(self, enemies):
         for enemy in enemies:

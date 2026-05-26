@@ -30,7 +30,7 @@ def movey(ty, y, speed):
         y -= speed
     return y, 0
 
-class enemy:
+class Enemy:
     def __init__(self, type, x, y):
         self.type = type
         self.x = x
@@ -38,41 +38,78 @@ class enemy:
         self.hp = 100
         self.max_hp = 100
         self.target_index = 1
-        self.shortest_path = []
+        self.shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
         if type in enemy_type:
             self.hp = enemy_info[enemy_type.index(self.type)][0]
             self.max_hp = enemy_info[enemy_type.index(self.type)][0]
             self.speed = enemy_info[enemy_type.index(self.type)][1]
             self.gold = enemy_info[enemy_type.index(self.type)][2]
 
-
+    def update_shortest_path(self):
+        self.shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
+    
+    def left_distance(self):
+        if self.target_index >= len(self.shortest_path):
+            return 0
+        tx, ty = get_pos(self.shortest_path[self.target_index][0], self.shortest_path[self.target_index][1])
+        return math.hypot(tx - self.x, ty - self.y) + (len(self.shortest_path) - self.target_index - 1) * TILE_SIZE
+    
     def move(self, dt):
-        shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
-        tx, ty = get_pos(shortest_path[0][0], shortest_path[0][1])
-        tx2, ty2 = get_pos(shortest_path[1][0], shortest_path[1][1])
-        if tx == self.x:
-            if (ty - self.y) * (ty2 - self.y) < 0:
-                self.y, remain = movey(ty2, self.y, self.speed * dt)
-            else:
-                self.y, remain = movey(ty, self.y, self.speed * dt)
-                if remain > 0:
-                    if tx2 == self.x:
-                        self.y, remain = movey(ty2, self.y, remain)
-                    else: 
-                        self.x, remain = movex(tx2, self.x, remain)
-        elif ty == self.y:
-            if (tx - self.x) * (tx2 - self.x) < 0:
-                self.x, remain = movex(tx2, self.x, self.speed * dt)
-            else:
-                self.x, remain = movex(tx, self.x, self.speed * dt)
-                if remain > 0:
-                    if ty2 == self.y:
-                        self.x, remain = movex(tx2, self.x, remain)
-                    else: 
-                        self.y, remain = movey(ty2, self.y, remain)
+        # tx, ty = get_pos(self.shortest_path[0][0], self.shortest_path[0][1])
+        # tx2, ty2 = get_pos(self.shortest_path[1][0], self.shortest_path[1][1])
+        # if tx == self.x:
+        #     if (ty - self.y) * (ty2 - self.y) < 0:
+        #         self.y, remain = movey(ty2, self.y, self.speed * dt)
+        #     else:
+        #         self.y, remain = movey(ty, self.y, self.speed * dt)
+        #         if remain > 0:
+        #             if tx2 == self.x:
+        #                 self.y, remain = movey(ty2, self.y, remain)
+        #             else: 
+        #                 self.x, remain = movex(tx2, self.x, remain)
+        # elif ty == self.y:
+        #     if (tx - self.x) * (tx2 - self.x) < 0:
+        #         self.x, remain = movex(tx2, self.x, self.speed * dt)
+        #     else:
+        #         self.x, remain = movex(tx, self.x, self.speed * dt)
+        #         if remain > 0:
+        #             if ty2 == self.y:
+        #                 self.x, remain = movex(tx2, self.x, remain)
+        #             else: 
+        #                 self.y, remain = movey(ty2, self.y, remain)
             
+        # 더 이상 이동할 경로가 없다면 탈출 (기지 도달)
+        if self.target_index >= len(self.shortest_path):
+            return
 
+        # 이번 프레임에 이동해야 할 총 거리
+        distance_to_move = self.speed * dt
 
+        while distance_to_move > 0 and self.target_index < len(self.shortest_path):
+            # 목적지 타일의 픽셀 위치 구하기
+            tx, ty = get_pos(self.shortest_path[self.target_index][0], self.shortest_path[self.target_index][1])
+
+            # 현재 위치에서 목적지까지의 x, y 거리
+            dx = tx - self.x
+            dy = ty - self.y
+            
+            # 목적지까지 남은 직선 거리 직선 거리 계산 (피타고라스)
+            distance_to_target = math.hypot(dx, dy)
+
+            # 1. 이번 프레임 이동 거리가 목적지까지 남은 거리보다 크거나 같다면 (목적지 도달)
+            if distance_to_move >= distance_to_target:
+                self.x = tx  # 목적지에 정확히 안착
+                self.y = ty
+                distance_to_move -= distance_to_target  # 남은 이동 거리 차감
+                self.target_index += 1  # ★ 다음 타일을 목적지로 설정!
+            
+            # 2. 아직 목적지에 도달하지 못했다면 현재 방향으로 전진 후 종료
+            else:
+                if distance_to_target > 0:
+                    # 방향 벡터를 이용해 정확한 속도로 이동
+                    self.x += (dx / distance_to_target) * distance_to_move
+                    self.y += (dy / distance_to_target) * distance_to_move
+                distance_to_move = 0  # 이동 완료했으므로 루프 탈출
         # remain = self.speed * dt
         # shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
 
