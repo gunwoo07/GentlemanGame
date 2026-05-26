@@ -10,11 +10,15 @@ class TowerButton:
         self.bx = bx
         self.by = by
         self.rect = pygame.Rect(bx, by, self.WIDTH, self.HEIGHT)
+        self.activation = False
     
     def draw(self, screen, font):
         # 버튼 배경 및 테두리
         pygame.draw.rect(screen, (60, 60, 60), self.rect)
-        pygame.draw.rect(screen, 'white', self.rect, 1)
+        if self.activation:
+            pygame.draw.rect(screen, 'yellow', self.rect, 1)
+        else:
+            pygame.draw.rect(screen, 'white', self.rect, 1)
 
         # 타워 아이콘(왼쪽 배치)
         pygame.draw.circle(screen, self.tower_class.LEVEL_DATA[1]['color'], (self.bx + 30, self.by + 40), 20)

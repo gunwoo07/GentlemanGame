@@ -17,7 +17,7 @@ class Tower:
     def __init__(self, x, y):
         self.grid_x = x
         self.grid_y = y
-        self.pos = pygame.Vector2((x+0.5)*TILE_SIZE + MARGIN, (y+0.5)*TILE_SIZE + MARGIN)
+        self.pos = pygame.Vector2((y+0.5)*TILE_SIZE + MARGIN, (x+0.5)*TILE_SIZE + MARGIN)
         self.rect = pygame.Rect(self.pos.x-TILE_SIZE/2, self.pos.y-TILE_SIZE/2, TILE_SIZE, TILE_SIZE)
 
         self.level = 1
@@ -65,6 +65,7 @@ class Tower:
         self.level_up()
         self.kill += other.kill
         self.deal += other.deal
+        self.skill_rate += other.skill_rate
 
     def _get_closest_enemy(self, enemies):
         closest_enemy = None
@@ -78,6 +79,7 @@ class Tower:
     
     def _check_enemy_in_range(self, enemy):
         return (pygame.Vector2(enemy.x, enemy.y) - self.pos).length() <= self.attack_range
+    
     # tower 마다 skill이 다르므로 skill 함수를 tower마다 구현해야 함
     def skill(self, enemies):
         pass
@@ -98,7 +100,7 @@ class Archer(Tower):
     LEVEL_DATA = {
         1: {"damage": 10, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.90, "cost": 50, "bullet_speed": 300, "color": (0, 255, 0)},
         2: {"damage": 15, "attack_range": 3.5*TILE_SIZE, "attack_speed": 0.40, "size_rate": 0.95, "cost": 30, "bullet_speed": 310, "color": (0, 150, 0)},
-        3: {"damage": 20, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.35, "size_rate": 1.00, "cost": 20, "bullet_spped": 320, "color": (0, 100, 0)}
+        3: {"damage": 20, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.35, "size_rate": 1.00, "cost": 20, "bullet_speed": 320, "color": (0, 100, 0)}
     }
     cost = LEVEL_DATA[1]["cost"]
 
@@ -217,7 +219,7 @@ class Frost(Tower):
     LEVEL_DATA = {
         1: {"damage": 5, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.60, "size_rate": 0.90, "cost": 40, "bullet_speed": 350, "color": (245, 254, 253)},
         2: {"damage": 10, "attack_range": 4.5*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.95, "cost": 30, "bullet_speed": 400, "color": (248, 248, 255)},
-        3: {"damage": 12, "attack_range": 4.7*TILE_SIZE, "attack_speed": 0.45, "size_rate": 1.00, "cost": 30, "bullet_spped": 420, "color": (255, 255, 255)}
+        3: {"damage": 12, "attack_range": 4.7*TILE_SIZE, "attack_speed": 0.45, "size_rate": 1.00, "cost": 30, "bullet_speed": 420, "color": (255, 255, 255)}
     }
     cost = LEVEL_DATA[1]["cost"]
 
