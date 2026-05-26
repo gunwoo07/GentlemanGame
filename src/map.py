@@ -29,22 +29,20 @@ game_map = [
     [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
 ]
 
-def find_shortest_path(game_map):
+def find_shortest_path(game_map, start_x, start_y):
     rows = len(game_map)
     cols = len(game_map[0])
 
-    start = None
+    start = (start_x, start_y)
     end = None
 
-    # 시작점(2), 도착점(3) 찾기
+    # 도착점(3) 찾기
     for y in range(rows):
         for x in range(cols):
-            if game_map[y][x] == 2:
-                start = (x, y)
-            elif game_map[y][x] == 3:
+            if game_map[y][x] == 3:
                 end = (x, y)
 
-    if start is None or end is None:
+    if end is None:
         return []
 
     # BFS용 리스트

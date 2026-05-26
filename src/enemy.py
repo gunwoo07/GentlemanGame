@@ -1,6 +1,7 @@
 import pygame
 from src.map import *
 from src.config import *
+import math
 
 enemy_info = [
     (100, 15, 50), # hp, speed, gold,  / normal
@@ -39,9 +40,17 @@ class enemy:
             self.gold = enemy_info[enemy_type.index(self.type)][2]
 
 
-    def move(self, shortest_path, dt):
+    def move(self, shortest_path,dt):
+        # shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
+        # tx, ty = get_pos(shortest_path[0][0], shortest_path[0][1])
+        # tx2, ty2 = get_pos(shortest_path[1][0], shortest_path[1][1])
+        # if tx == self.x:
+        #     if (ty - self.y) * (ty2 - self.y) < 0:
+        #         self.y = movey(ty2, self.y, self.speed * dt)
+
 
         remain = self.speed * dt
+        # shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
 
         tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
 

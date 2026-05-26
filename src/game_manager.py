@@ -22,7 +22,7 @@ class Game:
         pygame.display.set_caption("gentleman's tower defense")
         self.clock = pygame.time.Clock()
         self.running = True
-        self.shortest_path = find_shortest_path(game_map)
+        self.shortest_path = find_shortest_path(game_map, 0, START_ROW)
         self.enemy_list = []
         self.tower_list = [Frost(7, 8)]
         self.tower_list[0].is_selected = True
@@ -32,7 +32,8 @@ class Game:
         self.gold = 100
 
     def update(self, dt):
-        self.shortest_path = find_shortest_path(game_map)
+        self.shortest_path = find_shortest_path(game_map, 0, START_ROW)
+
     
         
         for e in self.enemy_list:
@@ -100,7 +101,7 @@ class Game:
                 "stat": {
                     "gold" : self.gold,
                     "hp" : 100,
-                    "wave" : 1,
+                    "wave" : self.wave,
                     "max_wave" : 5 
                 }
             }
