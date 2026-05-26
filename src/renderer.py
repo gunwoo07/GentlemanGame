@@ -83,10 +83,12 @@ class Renderer:
         if not self.is_selected_tower:
             text1 = self.font.render("웨이브 시작: 스페이스 바", True, 'white')
             text2 = self.font.render("타워 선택/배치/합체: 좌클릭", True, 'white')
-            text3 = self.font.render("F: 일시정지   ESC: 타이틀", True, 'white')
+            text3 = self.font.render("선택 취소: 우클릭", True, 'white')
+            text4 = self.font.render("F: 일시정지   ESC: 타이틀", True, 'white')
             self.screen.blit(text1, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y))
             self.screen.blit(text2, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 40))
             self.screen.blit(text3, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 60))
+            self.screen.blit(text4, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 80))
 
     def draw_path(self, path):
         for i in range(len(path) - 1):
