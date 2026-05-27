@@ -109,3 +109,7 @@ def find_shortest_path(game_map, start_x, start_y):
 
     return path
 
+def find_grid_pos(pos):
+    if not (MARGIN <= pos[0] <= MARGIN+MAP_WIDTH and MARGIN <= pos[1] <= MARGIN+MAP_HEIGHT):
+        return None
+    return ((pos[1]-MARGIN)//TILE_SIZE, (pos[0]-MARGIN)//TILE_SIZE)

@@ -31,7 +31,7 @@ def movey(ty, y, speed):
     return y, 0
 
 class Enemy:
-    def __init__(self, type, x, y):
+    def __init__(self, type, x, y, game_map):
         self.type = type
         self.x = x
         self.y = y
@@ -45,7 +45,7 @@ class Enemy:
             self.speed = enemy_info[enemy_type.index(self.type)][1]
             self.gold = enemy_info[enemy_type.index(self.type)][2]
 
-    def update_shortest_path(self):
+    def update_shortest_path(self, game_map):
         self.shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
     
     def left_distance(self):

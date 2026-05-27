@@ -3,7 +3,9 @@ from src.map import *
 from src.enemy import *
 from src.tower import Tower, Archer, Cannon, Frost, create_tower
 from src.renderer import *
+from src.title_screen.title_screen import TitleScreen
 import sys
+import pickle
 
 
 
@@ -30,14 +32,66 @@ class Game:
         self.bullet_list = []
         self.skill_list = []
         self.hp = 100
-        self.wave = 0
+        self.wave = 1
         self.gold = 100
         self.is_wave = False
         self.selected_tower_btn = None
         self.selected_tower = None # 
     
     def save(self):
-        print('save! 구현안함')
+        if self.selected_tower:
+            self.selected_tower.is_selected = False
+        save_data = {
+            "map": self.game_map,
+            "towers": self.tower_list,
+            "enemies": self.enemy_list,
+            "path": self.shortest_path,
+            "bullets": self.bullet_list,
+            "skills": self.skill_list,
+            "stat": {
+                "gold" : self.gold,
+                "hp" : self.hp,
+                "wave" : self.wave,
+                "max_wave" : len(wave_list)
+            },
+            "wave_list": wave_list
+        }
+        try:
+            with open("savegame.pkl", "wb") as f:
+                pickle.dump(save_data, f)
+            print("게임이 성공적으로 저장되었습니다!")
+        except Exception as e:
+            print(f"저장 중 오류 발생: {e}")
+
+    def load(self):
+        global wave_list
+        try:
+            with open("savegame.pkl", "rb") as f:
+                save_data = pickle.load(f)
+            
+            # stat 딕셔너리에서 데이터 복원
+            stats = save_data.get("stat", {})
+            self.hp = stats.get("hp", 100)
+            self.wave = stats.get("wave", 0)
+            self.gold = stats.get("gold", 100)
+            
+            # 나머지 리스트 및 데이터 복원 (save의 키와 일치)
+            self.tower_list = save_data.get("towers", [])
+            self.enemy_list = save_data.get("enemies", [])
+            self.bullet_list = save_data.get("bullets", [])
+            self.skill_list = save_data.get("skills", [])
+            self.game_map = save_data.get("map", game_map[:])
+            self.shortest_path = save_data.get("path", [])
+            self.is_wave = False # save 데이터에 없으므로 기본값 설정
+            wave_list = save_data.get("wave_list", [])
+            print("게임을 성공적으로 불러왔습니다!")
+            return True
+        except FileNotFoundError:
+            print("저장된 게임 파일을 찾을 수 없습니다.")
+            return False
+        except Exception as e:
+            print(f"불러오기 중 오류 발생: {e}")
+            return False
     
     def go_title(self):
         print('go title! 구현 안함')
@@ -91,27 +145,11 @@ class Game:
             return None
         return ((pos[1]-MARGIN)//TILE_SIZE, (pos[0]-MARGIN)//TILE_SIZE)
             
-    def handle_event(self):
-        pass
-        # for event in pygame.event.get():
-        #     if event.type == pygame.QUIT:
-        #         self.running = False
-        #         pygame.quit()
+    def inactivate_selected_tower(self):
+        if self.selected_tower:
+            self.selected_tower.is_selected = False
+            self.selected_tower = None
 
-        #     elif event.type == pygame.KEYDOWN:
-        #         if event.key == pygame.K_SPACE:
-        #             self.wave += 1
-        #             pygame.time.set_timer(ENEMY_SPAWN, 3000)
-
-        #     elif event.type == ENEMY_SPAWN:
-        #         if self.wave <= len(wave_list):
-        #             if wave_list[self.wave-1]:
-        #                 enemy_type = wave_list[self.wave-1].pop(0)
-        #                 self.enemy_list.append(enemy(enemy_type, *get_pos(0, 8)))
-        #         else:
-        #             pygame.time.set_timer(ENEMY_SPAWN, 0)
-
-    
     def rest_event_handler(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -119,24 +157,20 @@ class Game:
                 self.save()
                 self.quit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE: # wave 시작
                     self.is_wave = True
                     pygame.time.set_timer(ENEMY_SPAWN, 3000)
-                elif event.key == pygame.K_f:
-                    self.pause()
-                elif event.key == pygame.K_ESCAPE:
+                elif event.key == pygame.K_ESCAPE: # 게임 나가기
                     self.save()
                     self.go_title()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if event.button == 1: # 좌클릭
                     # map 영역
                     grid_pos = self.find_grid_pos(event.pos)
                     if grid_pos:
                         if self.selected_tower_btn and self.game_map[grid_pos[0]][grid_pos[1]] == 0:
-                            if self.selected_tower: # 기존 선택된 타워 비활성화
-                                self.selected_tower_btn.activation = False
-                                self.selected_tower_btn = None
+                            self.inactivate_selected_tower() # 선택된 타워 해제
                             new_tower = create_tower(self.selected_tower_btn.tower_class.type_name, grid_pos[0], grid_pos[1]) # 새 타워 건설
                             self.tower_list.append(new_tower)
                             self.game_map[grid_pos[0]][grid_pos[1]] = 4
@@ -295,10 +329,22 @@ class Game:
                         self.selected_tower_btn = None
     def play(self):
         # title screen
-        pass
+        title = TitleScreen(self.renderer.screen)
+        choice = title.run()
+        
+        if choice == "exit":
+            self.quit()
+        elif choice == "continue":
+            if not self.load():
+                # 불러오기 실패 시 새 게임으로 진행하거나 타이틀로 돌아감
+                pass
+        elif choice == "ranking":
+            # 랭킹 페이지 구현 전이므로 메시지만 출력하거나 타이틀로 돌아감
+            print("랭킹 페이지는 아직 구현되지 않았습니다.")
+            return self.play() # 다시 타이틀로
 
         # wave part(rest -> wave -> rest -> wave -> ... -> wave -> "finish")
-        for i in range(len(wave_list)):
+        for i in range(self.wave-1, len(wave_list)):
             # rest part
             self.is_wave = False
             self.wave = i + 1

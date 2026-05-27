@@ -30,19 +30,21 @@ class Renderer:
             if tower.is_selected:
                 self.selected_tower = tower
                 break
-
+    
     def render(self, game_state):
         # 선택된 타워가 있는지 확인
         self.check_is_tower_selected(game_state['towers'])
         
         self.screen.fill((75, 0, 130)) # indigo blue
-        self.draw_map(game_state['map'])
+        # self.draw_map(game_state["map"])
+        self.draw_map(game_state['game_map'])
         self.draw_path(game_state['path'])
         self.draw_towers(game_state['towers'])
         self.draw_enemies(game_state['enemies'])
         self.draw_bullets(game_state['bullets'])
         self.draw_skills(game_state['skills'])
-        self.draw_stat(game_state['stat'])
+        # self.draw_stat(game_state['stat'])
+        self.draw_stat({"hp": game_state["hp"], "gold": game_state["gold"], "wave": game_state["wave_index"]+1, "max_wave": len(game_state["wave_data"])})
 
     def draw_map(self, game_map):
         for i in range(ROWS):
