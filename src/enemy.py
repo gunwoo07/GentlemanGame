@@ -38,7 +38,7 @@ class Enemy:
         self.hp = 100
         self.max_hp = 100
         self.target_index = 1
-        self.shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
+        self.shortest_path = self.update_shortest_path(game_map)
         if type in enemy_type:
             self.hp = enemy_info[enemy_type.index(self.type)][0]
             self.max_hp = enemy_info[enemy_type.index(self.type)][0]
@@ -46,7 +46,27 @@ class Enemy:
             self.gold = enemy_info[enemy_type.index(self.type)][2]
 
     def update_shortest_path(self, game_map):
-        self.shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
+        # 1. 현재 픽셀 위치를 격자 단위(소수점 포함)로 변환
+        grid_y = (self.y - MARGIN) / TILE_SIZE
+        grid_x = (self.x - MARGIN) / TILE_SIZE
+        
+        # 2. 현재 정수 좌표(Tile Index) 구하기
+        logical_y = int(grid_y)
+        logical_x = int(grid_x)
+        
+        # 3. [핵심] 0.5 타일 이상 이동했다면 다음 타일을 시작점으로 간주
+        if grid_y - logical_y > 0.5: logical_y += 1
+        if grid_x - logical_x > 0.5: logical_x += 1
+        
+        # 4. 예측된 '논리적 위치'에서 새 경로 탐색
+        # (기존 find_shortest_path의 인자 순서에 맞춰 grid_x, grid_y를 적절히 배치)
+        new_path = find_shortest_path(game_map, logical_x, logical_y)
+        
+        if new_path:
+            self.shortest_path = new_path
+            # 5. 타겟 인덱스를 1로 설정하여 다음 칸으로 즉시 향하게 함
+            self.target_index = 1
+        return self.shortest_path
     
     def left_distance(self):
         if self.target_index >= len(self.shortest_path):

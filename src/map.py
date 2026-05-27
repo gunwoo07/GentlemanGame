@@ -78,7 +78,7 @@ def find_shortest_path(game_map, start_x, start_y):
                 continue
 
             # 벽
-            if game_map[ny][nx] == 1 or game_map[ny][nx] == 4:
+            if game_map[ny][nx] == 1 or ((nx, ny) != start and game_map[ny][nx] == 4):
                 continue
 
             # 방문 안 했으면
