@@ -101,6 +101,9 @@ class Game:
         except Exception as e:
             print(f"게임 저장 중 오류 발생: {e}")
 
+    def save_score(self, name, score):
+        pass
+
     def load(self):
         try:
             with open("savegame.pkl", "rb") as f:
@@ -128,11 +131,26 @@ class Game:
     def pause(self):
         print("멈춤")
     
-    def game_over(self):
-        print("게임 오버! 최종 웨이브:", self.wave_index)
+    def get_score(self):
+        return (self.wave_index+1) + self.hp + self.gold
 
-    def go_title(self):
-        pass
+    def game_over(self):
+        score = self.get_score()
+        result = self.renderer.show_result(False, score, self.wave_index)
+        if result[0] == 'exit':
+            self.quit()
+        elif result[0] == 'confirm':
+            self.save_score(result[1], score)
+            self.quit()
+
+    def game_clear(self):
+        score = self.get_score()
+        result = self.renderer.show_result(True, score, self.wave_index)
+        if result[0] == 'exit':
+            self.quit()
+        elif result[1] == 'confirm':
+            self.save_score(result[1], score)
+            self.quit()
 
     def quit(self):
         sys.exit(0)
@@ -190,7 +208,8 @@ class Game:
                     return
                 elif event.key == pygame.K_ESCAPE:
                     self.save()
-                    self.go_title()
+                    self.play()
+                    return
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     grid_pos = find_grid_pos(event.pos)
@@ -363,15 +382,19 @@ class Game:
             
     def run(self):
         # 타이틀 띄우기
-        title = TitleScreen(self.screen)
-        choice = title.run()
-
+        choice = self.renderer.show_title()
         if choice == "exit":
             self.quit()
         elif choice == "continue":
             if not self.load():
                 self.quit()
         elif choice == "ranking":
+            choice = self.renderer.show_ranking()
+            if choice == 'exit':
+                self.quit()
+            elif choice == 'back':
+                self.run()
+                return
             print("랭킹 페이지 구현해야함")
             return self.run()
         elif choice == "start":
@@ -436,7 +459,7 @@ class Game:
         # 웨이브 시작
         self.play()
         # 게임 오버 혹은 랭킹 페이지 저장
-        pass
+        self.game_clear()
 
 game_state = {
     "game_map": [[]],

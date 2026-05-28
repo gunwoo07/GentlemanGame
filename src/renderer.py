@@ -3,6 +3,9 @@ from src.config import *
 from src.map import get_pos_lefttop, get_pos
 from src.tower import Archer, Cannon, Frost
 from src.button import TowerButton, LevelupButton
+from src.title_screen.title_screen import TitleScreen
+from src.title_screen.ranking import RankingScreen
+from src.title_screen.result_screen import ResultScreen
 
 
 class Renderer:
@@ -11,7 +14,10 @@ class Renderer:
         self.title_font = pygame.font.SysFont("malgungothic", 20)
         self.font = pygame.font.SysFont("malgungothic", 16)
         self.small_font = pygame.font.SysFont("malgungothic", 12)
+        self.title_screen = TitleScreen(self.screen)
+        self.ranking_screen = RankingScreen(self.screen)
         self.BACKGROUND_COLOR = (75, 0, 130)
+
         self.selected_tower = None
         # 버튼 시작 위치 및 간격 계산
         start_x = MARGIN * 2
@@ -31,6 +37,16 @@ class Renderer:
             if tower.is_selected:
                 self.selected_tower = tower
                 break
+    
+    def show_title(self):
+        return self.title_screen.run()
+    
+    def show_ranking(self):
+        return self.ranking_screen.run()
+    
+    def show_result(self, is_win, score, wave_index):
+        result_screen = ResultScreen(self.screen, is_win, score, wave_index+1)
+        return result_screen.run()
     
     def render(self, game_state):
         # 선택된 타워가 있는지 확인
