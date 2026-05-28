@@ -143,6 +143,8 @@ class Game:
             self.skills = []
             self.enemies = []
             self.is_wave = False
+            self.gold += 100 + 20*(self.wave_index-1)
+
         # enemy, tower, bullet, skill update
         for enemy in self.enemies:
             if enemy.hp <= 0:
