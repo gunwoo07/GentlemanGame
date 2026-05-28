@@ -4,7 +4,7 @@ from src.map import get_pos_lefttop, get_pos
 from src.tower import Archer, Cannon, Frost
 from src.button import TowerButton, LevelupButton
 from src.title_screen.title_screen import TitleScreen
-from src.title_screen.ranking import RankingScreen
+from title_screen.ranking_screen import RankingScreen
 from src.title_screen.result_screen import ResultScreen
 
 
