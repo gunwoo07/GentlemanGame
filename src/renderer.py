@@ -11,6 +11,7 @@ class Renderer:
         self.title_font = pygame.font.SysFont("malgungothic", 20)
         self.font = pygame.font.SysFont("malgungothic", 16)
         self.small_font = pygame.font.SysFont("malgungothic", 12)
+        self.BACKGROUND_COLOR = (75, 0, 130)
         self.selected_tower = None
         # 버튼 시작 위치 및 간격 계산
         start_x = MARGIN * 2
@@ -35,7 +36,7 @@ class Renderer:
         # 선택된 타워가 있는지 확인
         self.check_is_tower_selected(game_state['towers'])
         
-        self.screen.fill((75, 0, 130)) # indigo blue
+        # self.screen.fill((75, 0, 130)) # indigo blue
         # self.draw_map(game_state["map"])
         self.draw_map(game_state['game_map'])
         self.draw_path(game_state['path'])
@@ -45,20 +46,30 @@ class Renderer:
         self.draw_skills(game_state['skills'])
         # self.draw_stat(game_state['stat'])
         self.draw_stat({"hp": game_state["hp"], "gold": game_state["gold"], "wave": game_state["wave_index"]+1, "max_wave": len(game_state["wave_data"])})
+        self.draw_blank()
 
     def draw_map(self, game_map):
         for i in range(ROWS):
             for j in range(COLS):
+                tile_rect = pygame.Rect(*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE)
                 if game_map[i][j] == 0:
-                    pygame.draw.rect(self.screen, 'lightgreen', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
-                if game_map[i][j] == 1:
-                    pygame.draw.rect(self.screen, 'brown', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
+                    if (i+j)%2 == 0:  
+                        pygame.draw.rect(self.screen, 'lightgreen', tile_rect)
+                    else:
+                        pygame.draw.rect(self.screen, 0x5ea152, tile_rect)
+                    if tile_rect.collidepoint(pygame.mouse.get_pos()):
+                        pygame.draw.rect(self.screen, 'yellow', tile_rect, 1)
+                    else:
+                        pygame.draw.rect(self.screen, 'black', tile_rect, 1)
+                elif game_map[i][j] == 1:
+                    pygame.draw.rect(self.screen, 'brown', tile_rect)
+                    pygame.draw.rect(self.screen, 'black', tile_rect, 1)
                 elif game_map[i][j] == 2:
-                    pygame.draw.rect(self.screen, 'red', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, 'red', tile_rect)
+                    pygame.draw.rect(self.screen, 'black', tile_rect, 1)
                 elif game_map[i][j] == 3:
-                    pygame.draw.rect(self.screen, 'green', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE))
-                # 테두리
-                pygame.draw.rect(self.screen, 'black', (*get_pos_lefttop(j, i), TILE_SIZE, TILE_SIZE), 1)
+                    pygame.draw.rect(self.screen, 'green', tile_rect)
+                    pygame.draw.rect(self.screen, 'black', tile_rect, 1)
 
     def draw_stat(self, stat):
         if self.selected_tower:
@@ -157,7 +168,15 @@ class Renderer:
     def draw_skills(self, skills):
         for skill in skills:
             skill.draw(self.screen)
-            
+    
+    def draw_blank(self):
+        # 가로
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (0, 0, WINDOW_WIDTH, MARGIN))
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (0, MARGIN+MAP_HEIGHT, WINDOW_WIDTH, MARGIN))
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (0, MARGIN*2+MAP_HEIGHT+STAT_HEIGHT, WINDOW_WIDTH, MARGIN))
+        # 세로
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (0, 0, MARGIN, WINDOW_HEIGHT))
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (MARGIN+MAP_WIDTH, 0, MARGIN, WINDOW_HEIGHT))
 """
 {
     "map":
