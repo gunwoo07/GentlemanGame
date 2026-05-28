@@ -1,7 +1,7 @@
 import pygame
-from src.map import *
-from src.bullet import Bullet
-from src.skill import InfiniteArrow, Bomb, Iceball
+from src.core.map import *
+from src.entities.bullet import Bullet
+from src.entities.skill import InfiniteArrow, Bomb, Iceball
 
 
 class Tower:

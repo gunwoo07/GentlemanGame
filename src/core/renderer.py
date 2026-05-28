@@ -1,11 +1,11 @@
 import pygame
-from src.config import *
-from src.map import get_pos_lefttop, get_pos
-from src.tower import Archer, Cannon, Frost
-from src.button import TowerButton, LevelupButton
-from src.title_screen.title_screen import TitleScreen
-from title_screen.ranking_screen import RankingScreen
-from src.title_screen.result_screen import ResultScreen
+from src.core.config import *
+from src.core.map import get_pos_lefttop, get_pos
+from src.entities.tower import Archer, Cannon, Frost
+from src.ui.components.button import TowerButton, LevelupButton
+from src.ui.screens.title_screen import TitleScreen
+from src.ui.screens.ranking_screen import RankingScreen
+from src.ui.screens.result_screen import ResultScreen
 
 
 class Renderer:

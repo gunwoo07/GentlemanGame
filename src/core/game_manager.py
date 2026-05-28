@@ -4,12 +4,12 @@ import pickle
 import json
 import copy
 import pygame
-from src.config import *
-from src.map import *
-from src.renderer import Renderer
-from src.tower import Tower, Archer, Cannon, Frost, create_tower
-from src.enemy import Enemy
-from src.title_screen.title_screen import TitleScreen
+from src.core.config import *
+from src.core.map import *
+from src.core.renderer import Renderer
+from src.entities.tower import Tower, Archer, Cannon, Frost, create_tower
+from src.entities.enemy import Enemy
+from src.ui.screens.title_screen import TitleScreen
 
 ENEMY_SPAWN = pygame.USEREVENT + 1
 ENEMY_SPAWN_INTERVAL = 1000 # 1초마다 적 생성
@@ -101,7 +101,7 @@ class Game:
 
         # pickle로 게임 정보 저장
         try:
-            with open("savegame.pkl", "wb") as f:
+            with open("./data/savegame.pkl", "wb") as f:
                 pickle.dump(self.before_game_state, f)
             print("게임이 성공적으로 저장되었습니다!")
         except Exception as e:
@@ -109,7 +109,7 @@ class Game:
 
     def save_score(self, name, score):
         rankings = []
-        file_path = "rankings.json"
+        file_path = "./data/rankings.json"
 
         if os.path.exists(file_path):
             try:
@@ -134,7 +134,7 @@ class Game:
 
     def load(self):
         try:
-            with open("savegame.pkl", "rb") as f:
+            with open("./data/savegame.pkl", "rb") as f:
                 save_data = pickle.load(f)
             self.game_map = save_data.get("game_map", [])
             self.towers = save_data.get("towers", [])

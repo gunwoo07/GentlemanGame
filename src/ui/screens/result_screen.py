@@ -1,6 +1,6 @@
 import pygame
-from src.config import WINDOW_WIDTH, WINDOW_HEIGHT
-from src.title_screen.title_screen import MenuButton
+from src.core.config import WINDOW_WIDTH, WINDOW_HEIGHT
+from src.ui.screens.title_screen import MenuButton
 
 class ResultScreen:
     def __init__(self, screen, is_win, score, wave):

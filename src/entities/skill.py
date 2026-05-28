@@ -1,5 +1,5 @@
 import pygame
-from src.config import *
+from src.core.config import *
 
 class Skill:
     def __init__(self, tower, target_enemy=None):

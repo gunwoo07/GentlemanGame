@@ -1,5 +1,6 @@
 import pygame
 import os
+from src.core.config import WINDOW_WIDTH, WINDOW_HEIGHT
 
 class MenuButton:
     def __init__(self, text, x, y, width, height, font, color=(100, 100, 100), hover_color=(150, 150, 150)):
@@ -29,7 +30,6 @@ class TitleScreen:
         self.font = pygame.font.SysFont("malgungothic", 30)
         self.title_font = pygame.font.SysFont("malgungothic", 60)
         
-        from src.config import WINDOW_WIDTH, WINDOW_HEIGHT
         
         btn_width = 250
         btn_height = 60

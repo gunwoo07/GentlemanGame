@@ -1,7 +1,7 @@
 import pygame
-from src.skill import Skill
-from src.map import *
-from src.config import *
+from src.entities.skill import Skill
+from src.core.map import *
+from src.core.config import *
 import math
 
 enemy_info = [

@@ -1,8 +1,8 @@
 import pygame
 import json
 import os
-from src.config import WINDOW_WIDTH, WINDOW_HEIGHT
-from src.title_screen.title_screen import MenuButton
+from src.core.config import WINDOW_WIDTH, WINDOW_HEIGHT
+from src.ui.screens.title_screen import MenuButton
 
 class RankingScreen:
     def __init__(self, screen):
@@ -20,9 +20,9 @@ class RankingScreen:
 
     def load_rankings(self):
         # rankings.json 파일에서 데이터를 가져옴
-        if os.path.exists("rankings.json"):
+        if os.path.exists("./data/rankings.json"):
             try:
-                with open("rankings.json", "r", encoding="utf-8") as f:
+                with open("./data/rankings.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
                     # 스코어(웨이브) 기준 내림차순 정렬
                     return sorted(data, key=lambda x: x.get('score', 0), reverse=True)
