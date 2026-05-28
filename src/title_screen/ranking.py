@@ -43,7 +43,7 @@ class RankingScreen:
         header_y = 150
         rank_header = self.font.render("순위", True, (200, 200, 200))
         name_header = self.font.render("이름", True, (200, 200, 200))
-        score_header = self.font.render("최고 웨이브", True, (200, 200, 200))
+        score_header = self.font.render("점수", True, (200, 200, 200))
         
         self.screen.blit(rank_header, (WINDOW_WIDTH // 2 - 200, header_y))
         self.screen.blit(name_header, (WINDOW_WIDTH // 2 - 80, header_y))

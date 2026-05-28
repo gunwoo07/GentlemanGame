@@ -1,5 +1,8 @@
 import sys
+import os
 import pickle
+import json
+import copy
 import pygame
 from src.config import *
 from src.map import *
@@ -37,7 +40,8 @@ class Game:
         self.before_game_state = {}; self.update_before_game_state() # 저장 시 필요함
 
         # 실행 중 필요한 정보
-        self.wave_data_progressed = self.wave_data[:]
+        self.current_message = None
+        self.wave_data_progressed = copy.deepcopy(self.wave_data)
         self.selected_tower = None
         self.selected_tower_btn = None
         self.is_wave = False
@@ -54,6 +58,7 @@ class Game:
             "hp": self.hp,
             "wave_data": self.wave_data,
             "wave_index": self.wave_index,
+            "current_message": None
         }
 
     def export_game_state(self):
@@ -68,6 +73,7 @@ class Game:
             "hp": self.hp,
             "wave_data": self.wave_data,
             "wave_index": self.wave_index,
+            "current_message": self.current_message
         }
     
     def inactivate_selected_tower(self):
@@ -102,7 +108,29 @@ class Game:
             print(f"게임 저장 중 오류 발생: {e}")
 
     def save_score(self, name, score):
-        pass
+        rankings = []
+        file_path = "rankings.json"
+
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    rankings = json.load(f)
+            except (json.JSONDecodeError, Exception):
+                rankings = []
+        
+        new_entry = {
+            'name': name,
+            'score': score
+        }
+        rankings.append(new_entry)
+        rankings.sort(key=lambda x: x.get('score', 0), reverse=True)
+
+        try:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(rankings, f, ensure_ascii=False, indent=4)
+                return True
+        except:
+            return False
 
     def load(self):
         try:
@@ -118,9 +146,9 @@ class Game:
             self.hp = save_data.get("hp", 100)
             self.wave_data = save_data.get("wave_data", [])
             self.wave_index = save_data.get("wave_index", 0)
-            
+            self.current_message = save_data.get("current_message", None)
             self.update_before_game_state()
-            self.wave_data_progressed = self.wave_data[:]
+            self.wave_data_progressed = copy.deepcopy(self.wave_data)
             
             print("게임을 성공적으로 불러왔습니다!")
             return True
@@ -152,9 +180,22 @@ class Game:
             self.save_score(result[1], score)
             self.quit()
 
+    def add_message(self, text, duration=1.5):
+        self.current_message = {
+            'text': text,
+            'timer': duration,
+            'max_duration': duration
+        }
     def quit(self):
         sys.exit(0)
-    def update(self, dt):
+
+    def rest_update(self, dt):
+        if self.current_message:
+            self.current_message['timer'] -= dt
+            if self.current_message['timer'] <= 0:
+                self.current_message = None
+
+    def wave_update(self, dt):
         # 종료 조건
         if len(self.wave_data_progressed[self.wave_index]) == 0 and len(self.enemies) == 0:
             self.bullets = []
@@ -163,6 +204,11 @@ class Game:
             self.is_wave = False
             self.gold += 100 + 20*(self.wave_index-1)
 
+        if self.current_message:
+            self.current_message['timer'] -= dt
+            if self.current_message['timer'] <= 0:
+                self.current_message = None
+        
         # enemy, tower, bullet, skill update
         for enemy in self.enemies:
             if enemy.hp <= 0:
@@ -256,7 +302,7 @@ class Game:
                             self.inactivate_selected_tower_btn() # 타워 버튼 해제
                             # 골드가 충분한지 확인
                             if self.gold < tower_btn.tower_class.cost:
-                                print("골드가 부족합니다.")
+                                self.add_message("골드가 부족합니다.")
                             else:
                                 self.activate_selected_tower_btn(tower_btn) # 타워 버튼 활성화
                     # stat 영역 - 레벨업 버튼 클릭했을 때
@@ -264,9 +310,9 @@ class Game:
                         if self.renderer.levelup_btn.rect.collidepoint(event.pos):
                             # 레벨업이 가능한지 확인
                             if not self.selected_tower.level < self.selected_tower.max_level:
-                                print("이미 최고레벨입니다.")
+                                self.add_message("이미 최고레벨입니다.")
                             elif self.gold < self.selected_tower.LEVEL_DATA[self.selected_tower.level + 1]["cost"]:
-                                print("골드가 부족합니다.")
+                                self.add_message("골드가 부족합니다.")
                             else:
                                 self.gold -= self.selected_tower.LEVEL_DATA[self.selected_tower.level + 1]["cost"]
                                 self.selected_tower.level_up()
@@ -339,7 +385,7 @@ class Game:
                                 self.inactivate_selected_tower_btn() # 타워 버튼 해제
                                 # 골드가 충분한지 확인
                                 if self.gold < tower_btn.tower_class.cost:
-                                    print("골드가 부족합니다.")
+                                    self.add_message("골드가 부족합니다.")
                                 else:
                                     self.activate_selected_tower_btn(tower_btn) # 타워 버튼 활성화
                         # stat 영역 - 레벨업 버튼 클릭했을 때
@@ -347,9 +393,9 @@ class Game:
                             if self.renderer.levelup_btn.rect.collidepoint(event.pos):
                                 # 레벨업이 가능한지 확인
                                 if not self.selected_tower.level < self.selected_tower.max_level:
-                                    print("이미 최고레벨입니다.")
+                                    self.add_message("이미 최고레벨입니다.")
                                 elif self.gold < self.selected_tower.LEVEL_DATA[self.selected_tower.level + 1]["cost"]:
-                                    print("골드가 부족합니다.")
+                                    self.add_message("골드가 부족합니다.")
                                 else:
                                     self.gold -= self.selected_tower.LEVEL_DATA[self.selected_tower.level + 1]["cost"]
                                     self.selected_tower.level_up()
@@ -361,12 +407,14 @@ class Game:
         for i in range(self.wave_index, len(self.wave_data)):
             self.wave_index = i
             self.path = find_shortest_path(self.game_map, 0, START_ROW)
+            self.update_before_game_state()
             while not self.is_wave:
-                self.clock.tick(60)
+                dt = self.clock.tick(60) / 1000
+                self.rest_update(dt)
                 self.rest_event_handler()
                 self.renderer.render(self.export_game_state())
                 pygame.display.flip()
-
+            self.update_before_game_state()
             while self.is_wave:
                 dt = self.clock.tick(60) / 1000
 
@@ -376,7 +424,7 @@ class Game:
                     return
                 
                 self.wave_event_handler()
-                self.update(dt)
+                self.wave_update(dt)
                 self.renderer.render(self.export_game_state())
                 pygame.display.flip()
             
@@ -395,9 +443,8 @@ class Game:
             elif choice == 'back':
                 self.run()
                 return
-            print("랭킹 페이지 구현해야함")
-            return self.run()
-        elif choice == "start":
+            self.run()
+        elif choice == "easy":
             self.wave_data = [
                 ["normal", "normal", "normal", "normal", "normal"],
                 ["normal", "normal", "normal", "normal", "fast", "fast", "fast", "fast", "fast", "fast"],
@@ -405,7 +452,7 @@ class Game:
                 ["strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast", "fast", "fast"],
                 ["strong", "strong", "strong", "boss"]
             ]
-            self.wave_data_progressed = self.wave_data[:]
+            self.wave_data_progressed = copy.deepcopy(self.wave_data)
             self.game_map = [
                 [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -425,7 +472,7 @@ class Game:
                 [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
             ]
 
-        elif choice == "start":
+        elif choice == "hard":
             self.wave_data = [
                 ["normal", "normal", "normal", "normal", "normal", "normal", "normal"],
                 ["normal", "normal", "normal", "normal", "fast", "fast", "fast", "fast", "fast", "fast","fast","fast","fast"],
@@ -433,7 +480,7 @@ class Game:
                 ["strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast", "fast", "fast", "strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast"],
                 ["strong", "strong", "strong", "strong", "strong", "strong", "strong", "boss"]
             ]
-            self.wave_data_progressed = self.wave_data[:]
+            self.wave_data_progressed = copy.deepcopy(self.wave_data)
             self.game_map = [
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -461,15 +508,15 @@ class Game:
         # 게임 오버 혹은 랭킹 페이지 저장
         self.game_clear()
 
-game_state = {
-    "game_map": [[]],
-    "towers": [],
-    "enemies": [],
-    "bullets": [],
-    "skills": [],
-    "path": [[]],
-    "gold": 0,
-    "hp": 0,
-    "wave_data": [],
-    "wave_index": 0,
-}
+# game_state = {
+#     "game_map": [[]],
+#     "towers": [],
+#     "enemies": [],
+#     "bullets": [],
+#     "skills": [],
+#     "path": [[]],
+#     "gold": 0,
+#     "hp": 0,
+#     "wave_data": [],
+#     "wave_index": 0,
+# }

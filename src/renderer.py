@@ -62,6 +62,7 @@ class Renderer:
         self.draw_skills(game_state['skills'])
         # self.draw_stat(game_state['stat'])
         self.draw_stat({"hp": game_state["hp"], "gold": game_state["gold"], "wave": game_state["wave_index"]+1, "max_wave": len(game_state["wave_data"])})
+        self.draw_message(game_state['current_message'])
         self.draw_blank()
 
     def draw_map(self, game_map):
@@ -185,6 +186,26 @@ class Renderer:
         for skill in skills:
             skill.draw(self.screen)
     
+    def draw_message(self, msg):
+        if not msg:
+            return
+        alpha = max(0, int((msg['timer']))/msg['max_duration'] * 255)
+        text_surf = self.title_font.render(msg['text'], True, (255, 255, 255))
+        
+        temp_surf = pygame.Surface(text_surf.get_size(), pygame.SRCALPHA)
+        temp_surf.blit(text_surf, (0, 0))
+        temp_surf.set_alpha(alpha)
+
+        text_rect = temp_surf.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 80))
+
+        bg_rect = text_rect.inflate(40, 20)
+        bg_surf = pygame.Surface(bg_rect.size, pygame.SRCALPHA)
+
+        pygame.draw.rect(bg_surf, (0, 0, 0, int(alpha//1.5)), bg_surf.get_rect(), border_radius=10)
+
+        self.screen.blit(bg_surf, bg_rect)
+        self.screen.blit(temp_surf, text_rect)
+
     def draw_blank(self):
         # 가로
         pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (0, 0, WINDOW_WIDTH, MARGIN))

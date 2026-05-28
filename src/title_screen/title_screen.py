@@ -37,10 +37,11 @@ class TitleScreen:
         start_y = 250
         
         self.buttons = {
-            "start": MenuButton("새 게임 시작", start_x, start_y, btn_width, btn_height, self.font),
-            "continue": MenuButton("이어하기", start_x, start_y + 80, btn_width, btn_height, self.font),
-            "ranking": MenuButton("랭킹 보기", start_x, start_y + 160, btn_width, btn_height, self.font),
-            "exit": MenuButton("종료", start_x, start_y + 240, btn_width, btn_height, self.font)
+            "easy": MenuButton("이지 모드", start_x, start_y, btn_width, btn_height, self.font),
+            "hard": MenuButton("하드 모드", start_x, start_y + 80, btn_width, btn_height, self.font),
+            "continue": MenuButton("이어하기", start_x, start_y + 160, btn_width, btn_height, self.font),
+            "ranking": MenuButton("랭킹 보기", start_x, start_y + 240, btn_width, btn_height, self.font),
+            "exit": MenuButton("종료", start_x, start_y + 320, btn_width, btn_height, self.font)
         }
         
         self.save_exists = os.path.exists("savegame.pkl")
@@ -70,8 +71,10 @@ class TitleScreen:
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    if self.buttons["start"].rect.collidepoint(event.pos):
-                        return "start"
+                    if self.buttons["easy"].rect.collidepoint(event.pos):
+                        return "easy"
+                    if self.buttons["hard"].rect.collidepoint(event.pos):
+                        return "hard"
                     if self.buttons["continue"].rect.collidepoint(event.pos) and self.save_exists:
                         return "continue"
                     if self.buttons["ranking"].rect.collidepoint(event.pos):
