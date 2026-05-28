@@ -32,8 +32,9 @@ class InfiniteArrow(Skill):
             if enemy not in self.hit_enemies:
                 dist = (pygame.Vector2(enemy.x, enemy.y) - self.pos).length()
                 if dist <= TILE_SIZE:
-                    enemy.hp -= self.damage
-                    self.tower.deal += self.damage
+                    if not enemy.is_invincible:
+                        enemy.hp -= self.damage
+                        self.tower.deal += self.damage
                     if enemy.hp <= 0:
                         self.tower.kill += 1
                     self.hit_enemies.add(enemy)

@@ -152,7 +152,13 @@ class Game:
                 self.hp -= 10
                 self.enemies.remove(enemy)
         for enemy in self.enemies:
+            
             enemy.move(dt)
+            
+            result = enemy.update(dt)
+
+            if result:
+                self.skills.append(result)
         
         for tower in self.towers:
             result = tower.update(dt, self.enemies)
@@ -368,7 +374,8 @@ class Game:
             return self.run()
         elif choice == "start":
             self.wave_data = [
-                ["normal", "normal", "normal", "normal", "normal", "normal", "normal"],
+                # ["normal", "normal", "normal", "normal", "normal", "normal", "normal"],
+                ["boss"],
                 ["normal", "normal", "normal", "normal", "fast", "fast", "fast", "fast", "fast", "fast"],
                 ["strong", "strong", "strong", "normal", "normal", "normal", "normal", "fast", "fast", "fast"],
                 ["strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast", "fast", "fast"],

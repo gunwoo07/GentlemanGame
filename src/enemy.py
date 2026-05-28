@@ -1,4 +1,5 @@
 import pygame
+from src.skill import Skill
 from src.map import *
 from src.config import *
 import math
@@ -39,6 +40,13 @@ class Enemy:
         self.max_hp = 100
         self.target_index = 1
         self.shortest_path = self.update_shortest_path(game_map)
+        self.skill_cooldown = 8
+        self.skill_timer = 0
+        self.is_invincible = False
+        self.is_casting = False
+
+        self.game_map = game_map
+
         if type in enemy_type:
             self.hp = enemy_info[enemy_type.index(self.type)][0]
             self.max_hp = enemy_info[enemy_type.index(self.type)][0]
@@ -75,28 +83,8 @@ class Enemy:
         return math.hypot(tx - self.x, ty - self.y) + (len(self.shortest_path) - self.target_index - 1) * TILE_SIZE
     
     def move(self, dt):
-        # tx, ty = get_pos(self.shortest_path[0][0], self.shortest_path[0][1])
-        # tx2, ty2 = get_pos(self.shortest_path[1][0], self.shortest_path[1][1])
-        # if tx == self.x:
-        #     if (ty - self.y) * (ty2 - self.y) < 0:
-        #         self.y, remain = movey(ty2, self.y, self.speed * dt)
-        #     else:
-        #         self.y, remain = movey(ty, self.y, self.speed * dt)
-        #         if remain > 0:
-        #             if tx2 == self.x:
-        #                 self.y, remain = movey(ty2, self.y, remain)
-        #             else: 
-        #                 self.x, remain = movex(tx2, self.x, remain)
-        # elif ty == self.y:
-        #     if (tx - self.x) * (tx2 - self.x) < 0:
-        #         self.x, remain = movex(tx2, self.x, self.speed * dt)
-        #     else:
-        #         self.x, remain = movex(tx, self.x, self.speed * dt)
-        #         if remain > 0:
-        #             if ty2 == self.y:
-        #                 self.x, remain = movex(tx2, self.x, remain)
-        #             else: 
-        #                 self.y, remain = movey(ty2, self.y, remain)
+        if self.is_casting:
+            return
             
         # 더 이상 이동할 경로가 없다면 탈출 (기지 도달)
         if self.target_index >= len(self.shortest_path):
@@ -129,45 +117,20 @@ class Enemy:
                     # 방향 벡터를 이용해 정확한 속도로 이동
                     self.x += (dx / distance_to_target) * distance_to_move
                     self.y += (dy / distance_to_target) * distance_to_move
-                distance_to_move = 0  # 이동 완료했으므로 루프 탈출
-        # remain = self.speed * dt
-        # shortest_path = find_shortest_path(game_map, math.floor((self.x - MARGIN) / TILE_SIZE), math.floor((self.y - MARGIN) / TILE_SIZE))
+                distance_to_move = 0  
 
-        # tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
+    def update(self, dt):
+        if self.type != "boss":
+            return None
 
-        # if shortest_path[self.target_index][1] == shortest_path[self.target_index - 1][1]:
-        #     dist = abs(tx - self.x)
-            
+        if self.is_casting:
+            return None
 
-        #     if remain >= dist:
-        #         self.x = tx
-        #         remain -= dist
-        #         self.target_index += 1
-        #         tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
-        #         if shortest_path[self.target_index][1] == shortest_path[self.target_index - 1][1]:
-        #             self.x = movex(tx, self.x, remain)
-        #         else:
-        #             self.y = movey(ty, self.y, remain)
-                
-        #     else:
-        #         self.x = movex(tx, self.x, self.speed * dt)
+        self.skill_timer += dt
 
-        # elif shortest_path[self.target_index][0] == shortest_path[self.target_index - 1][0]:
-
-        #     dist = abs(ty - self.y)
-
-        #     if remain >= dist:
-        #         self.y = ty
-        #         remain -= dist
-        #         self.target_index += 1
-        #         tx, ty = get_pos(shortest_path[self.target_index][0], shortest_path[self.target_index][1])
-        #         if shortest_path[self.target_index][1] == shortest_path[self.target_index - 1][1]:
-        #             self.x = movex(tx, self.x, remain)
-        #         else:
-        #             self.y = movey(ty, self.y, remain)
-        #     else:
-        #         self.y = movey(ty, self.y, self.speed * dt)
-
+        if self.skill_timer >= self.skill_cooldown:
+            self.skill_timer = 0
+            return BossSkill(self)
 
     def draw(self, screen):
         # 적 몸통
@@ -203,7 +166,50 @@ class Enemy:
         pygame.draw.rect(screen, (255, 255, 255), (bar_x, bar_y, bar_width, bar_height), 1)
 
 
-        
+class BossSkill(Skill):
+    def __init__(self, boss):
+        self.boss = boss
 
-    
-    
+        self.is_finished = False
+
+        self.duration = 3.0
+        self.timer = 0
+
+        self.spawn_interval = 0.5
+        self.spawn_timer = 0
+
+        # 보스 상태
+        self.boss.is_invincible = True
+        self.boss.is_casting = True
+
+    def move(self, dt, enemies):
+        self.timer += dt
+        self.spawn_timer += dt
+
+        # 적 소환
+        if self.spawn_timer >= self.spawn_interval:
+            self.spawn_timer = 0
+
+            enemies.append(
+                Enemy(
+                    "normal",
+                    self.boss.x,
+                    self.boss.y,
+                    self.boss.game_map
+                )
+            )
+
+        # 종료
+        if self.timer >= self.duration:
+            self.boss.is_invincible = False
+            self.boss.is_casting = False
+            self.is_finished = True
+
+    def draw(self, screen):
+        pygame.draw.circle(
+            screen,
+            (180, 0, 255),
+            (int(self.boss.x), int(self.boss.y)),
+            60,
+            5
+        )
