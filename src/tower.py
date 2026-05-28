@@ -8,9 +8,9 @@ class Tower:
     # 타워마다 다르게 설정해야 함!!!example(archer)
     type_name = "archer"
     LEVEL_DATA = {
-        1: {"damage": 10, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.90, "cost": 50, "bullet_speed": 300, "color": (0, 255, 0)},
-        2: {"damage": 15, "attack_range": 3.5*TILE_SIZE, "attack_speed": 0.40, "size_rate": 0.95, "cost": 30, "bullet_speed": 310, "color": (0, 150, 0)},
-        3: {"damage": 20, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.35, "size_rate": 1.00, "cost": 20, "bullet_spped": 320, "color": (0, 100, 0)}
+        1: {"damage": 15, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.90, "cost": 50, "bullet_speed": 300, "color": (0, 255, 0)},
+        2: {"damage": 20, "attack_range": 3.5*TILE_SIZE, "attack_speed": 0.40, "size_rate": 0.95, "cost": 30, "bullet_speed": 310, "color": (0, 150, 0)},
+        3: {"damage": 25, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.35, "size_rate": 1.00, "cost": 20, "bullet_spped": 320, "color": (0, 100, 0)}
     }
     cost = LEVEL_DATA[1]["cost"]
 
@@ -90,9 +90,9 @@ class Tower:
 class Archer(Tower):
     type_name = "archer"
     LEVEL_DATA = {
-        1: {"damage": 10, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.90, "cost": 50, "bullet_speed": 300, "color": (0, 255, 0)},
-        2: {"damage": 15, "attack_range": 3.5*TILE_SIZE, "attack_speed": 0.40, "size_rate": 0.95, "cost": 30, "bullet_speed": 310, "color": (0, 150, 0)},
-        3: {"damage": 20, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.35, "size_rate": 1.00, "cost": 20, "bullet_speed": 320, "color": (0, 100, 0)}
+        1: {"damage": 15, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.90, "cost": 50, "bullet_speed": 300, "color": (0, 255, 0)},
+        2: {"damage": 20, "attack_range": 3.5*TILE_SIZE, "attack_speed": 0.40, "size_rate": 0.95, "cost": 30, "bullet_speed": 310, "color": (0, 150, 0)},
+        3: {"damage": 25, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.35, "size_rate": 1.00, "cost": 20, "bullet_speed": 320, "color": (0, 100, 0)}
     }
     cost = LEVEL_DATA[1]["cost"]
 
@@ -159,9 +159,9 @@ class Archer(Tower):
 class Cannon(Tower):
     type_name = "cannon"
     LEVEL_DATA = {
-        1: {"damage": 40, "attack_range": 2.5*TILE_SIZE, "attack_speed": 0.70, "size_rate": 0.90, "cost": 60, "bullet_speed": 400, "color": (211, 211, 211)},
-        2: {"damage": 42, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.75, "size_rate": 0.95, "cost": 30, "bullet_speed": 410, "color": (169, 169, 169)},
-        3: {"damage": 45, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.80, "size_rate": 1.00, "cost": 20, "bullet_speed": 420, "color": (128, 128, 128)}
+        1: {"damage": 40, "attack_range": 2.5*TILE_SIZE, "attack_speed": 0.70, "size_rate": 0.90, "cost": 80, "bullet_speed": 400, "color": (211, 211, 211)},
+        2: {"damage": 42, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.75, "size_rate": 0.95, "cost": 50, "bullet_speed": 410, "color": (169, 169, 169)},
+        3: {"damage": 45, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.80, "size_rate": 1.00, "cost": 50, "bullet_speed": 420, "color": (128, 128, 128)}
     }
     cost = LEVEL_DATA[1]["cost"]
 

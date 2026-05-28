@@ -17,12 +17,14 @@ class Bullet:
     def move(self, dt):
         if (self.enemy_pos - self.pos).length() <= self.speed * dt:
             self.pos = self.enemy_pos.copy()
-            if self.enemy.hp < self.damage:
-                self.tower.kill += 1
-                self.enemy.hp = 0
-            else:
-                self.enemy.hp -= self.damage
-            self.tower.deal += self.damage
+            if not self.enemy.is_invincible:
+                if self.enemy.hp < self.damage:
+                    self.tower.kill += 1
+                    self.enemy.hp = 0
+                else:
+
+                    self.enemy.hp -= self.damage
+                self.tower.deal += self.damage
             self.is_finished = True
         else:
             self.pos += self.velocity * dt

@@ -30,7 +30,7 @@ class Game:
         self.bullets = []
         self.skills = []
         self.path = [[]]
-        self.gold = 100
+        self.gold = 200
         self.hp = 100
         self.wave_data = [[]]
         self.wave_index = 0

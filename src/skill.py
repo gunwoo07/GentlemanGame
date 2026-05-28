@@ -35,8 +35,8 @@ class InfiniteArrow(Skill):
                     if not enemy.is_invincible:
                         enemy.hp -= self.damage
                         self.tower.deal += self.damage
-                    if enemy.hp <= 0:
-                        self.tower.kill += 1
+                        if enemy.hp <= 0:
+                            self.tower.kill += 1
                     self.hit_enemies.add(enemy)
 
         # 2. Map Boundary Check (Remove if outside map area)
@@ -122,7 +122,9 @@ class Iceball(Skill):
                 
                 # Apply Slow (40% reduction)
                 self.original_speed = self.enemy.speed
-                self.enemy.speed *= 0.6
+                self.enemy.speed *= 0.7
+                if self.enemy.speed < 10:
+                    self.enemy.speed = 10
             else:
                 self.velocity = (target_current - self.pos).normalize() * self.speed
                 self.pos += self.velocity * dt
