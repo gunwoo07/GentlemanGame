@@ -5,10 +5,10 @@ from src.config import *
 import math
 
 enemy_info = [
-    (100, 45, 50), # hp, speed, gold,  / normal
-    (100, 25, 70), # fast
-    (200, 10, 100), # strong
-    (1000, 30, 500) # boss
+    (200, 45, 5), # hp, speed, gold,  / normal
+    (200, 60, 8), # fast
+    (400, 35, 10), # strong
+    (10000, 25, 500) # boss
 ]
 
 enemy_type = ["normal", "fast", "strong", "boss"]
