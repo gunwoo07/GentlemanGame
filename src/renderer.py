@@ -177,18 +177,3 @@ class Renderer:
         # 세로
         pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (0, 0, MARGIN, WINDOW_HEIGHT))
         pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (MARGIN+MAP_WIDTH, 0, MARGIN, WINDOW_HEIGHT))
-"""
-{
-    "map":
-    "towers":
-    "selected_tower":
-    "enemies":
-    "bullets": 
-    "stat": {
-        "gold":
-        "hp":
-        "wave":
-        "max_wave":
-    }
-}
-"""
