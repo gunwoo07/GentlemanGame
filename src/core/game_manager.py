@@ -101,7 +101,7 @@ class Game:
 
         # pickle로 게임 정보 저장
         try:
-            with open("./data/savegame.pkl", "wb") as f:
+            with open(SAVEGAME_PATH, "wb") as f:
                 pickle.dump(self.before_game_state, f)
             print("게임이 성공적으로 저장되었습니다!")
         except Exception as e:
@@ -109,11 +109,10 @@ class Game:
 
     def save_score(self, name, score):
         rankings = []
-        file_path = "./data/rankings.json"
 
-        if os.path.exists(file_path):
+        if os.path.exists(RANKING_PATH):
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(RANKING_PATH, 'r', encoding='utf-8') as f:
                     rankings = json.load(f)
             except (json.JSONDecodeError, Exception):
                 rankings = []
@@ -126,7 +125,7 @@ class Game:
         rankings.sort(key=lambda x: x.get('score', 0), reverse=True)
 
         try:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(RANKING_PATH, 'w', encoding='utf-8') as f:
                 json.dump(rankings, f, ensure_ascii=False, indent=4)
                 return True
         except:
@@ -134,7 +133,7 @@ class Game:
 
     def load(self):
         try:
-            with open("./data/savegame.pkl", "rb") as f:
+            with open(SAVEGAME_PATH, "rb") as f:
                 save_data = pickle.load(f)
             self.game_map = save_data.get("game_map", [])
             self.towers = save_data.get("towers", [])

@@ -3,4 +3,4 @@ __pycache__/
 *.pyo
 .vscode/
 savegame.pkl
-rankings.json
+ranking.json
