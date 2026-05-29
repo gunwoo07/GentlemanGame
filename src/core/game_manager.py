@@ -9,7 +9,7 @@ from src.core.map import *
 from src.core.renderer import Renderer
 from src.entities.tower import Tower, Archer, Cannon, Frost, create_tower
 from src.entities.enemy import Enemy
-from src.ui.screens.title_screen import TitleScreen
+from src.utils.save_load import SaveManager
 
 ENEMY_SPAWN = pygame.USEREVENT + 1
 ENEMY_SPAWN_INTERVAL = 1000 # 1초마다 적 생성
@@ -37,7 +37,7 @@ class Game:
         self.hp = 100
         self.wave_data = [[]]
         self.wave_index = 0
-        self.before_game_state = {}; self.update_before_game_state() # 저장 시 필요함
+        self.before_game_state = {}
 
         # 실행 중 필요한 정보
         self.current_message = None
@@ -45,9 +45,12 @@ class Game:
         self.selected_tower = None
         self.selected_tower_btn = None
         self.is_wave = False
+        self.update_before_game_state()
 
     def update_before_game_state(self):
-        self.before_game_state = {
+        if self.selected_tower:
+            self.selected_tower.is_selected = False
+        self.before_game_state = copy.deepcopy({
             "game_map": self.game_map,
             "towers": self.towers,
             "enemies": [],
@@ -59,7 +62,9 @@ class Game:
             "wave_data": self.wave_data,
             "wave_index": self.wave_index,
             "current_message": None
-        }
+        })
+        if self.selected_tower:
+            self.selected_tower.is_selected = True
 
     def export_game_state(self):
         return {
@@ -94,66 +99,66 @@ class Game:
         self.selected_tower_btn = tower_btn
         self.selected_tower_btn.activation = True
     
-    def save(self):
-        # 실행중 필요한 정보 초기화
-        self.inactivate_selected_tower()
-        self.inactivate_selected_tower_btn()
+    # def save(self):
+    #     # 실행중 필요한 정보 초기화
+    #     self.inactivate_selected_tower()
+    #     self.inactivate_selected_tower_btn()
 
-        # pickle로 게임 정보 저장
-        try:
-            with open(SAVEGAME_PATH, "wb") as f:
-                pickle.dump(self.before_game_state, f)
-            print("게임이 성공적으로 저장되었습니다!")
-        except Exception as e:
-            print(f"게임 저장 중 오류 발생: {e}")
+    #     # pickle로 게임 정보 저장
+    #     try:
+    #         with open(SAVEGAME_PATH, "wb", encoding="utf-8") as f:
+    #             pickle.dump(self.before_game_state, f)
+    #         print(f"게임이 성공적으로 저장되었습니다! ({SAVEGAME_PATH})")
+    #     except Exception as e:
+    #         print(f"게임 저장 중 오류 발생: {e}")
 
-    def save_score(self, name, score):
-        rankings = []
+    # def save_score(self, name, score):
+    #     rankings = []
 
-        if os.path.exists(RANKING_PATH):
-            try:
-                with open(RANKING_PATH, 'r', encoding='utf-8') as f:
-                    rankings = json.load(f)
-            except (json.JSONDecodeError, Exception):
-                rankings = []
+    #     if os.path.exists(RANKING_PATH):
+    #         try:
+    #             with open(RANKING_PATH, "r", encoding="utf-8") as f:
+    #                 rankings = json.load(f)
+    #         except (json.JSONDecodeError, Exception):
+    #             rankings = []
         
-        new_entry = {
-            'name': name,
-            'score': score
-        }
-        rankings.append(new_entry)
-        rankings.sort(key=lambda x: x.get('score', 0), reverse=True)
+    #     new_entry = {
+    #         "name": name,
+    #         "score": score
+    #     }
+    #     rankings.append(new_entry)
+    #     rankings.sort(key=lambda x: x.get("score", 0), reverse=True)
 
-        try:
-            with open(RANKING_PATH, 'w', encoding='utf-8') as f:
-                json.dump(rankings, f, ensure_ascii=False, indent=4)
-                return True
-        except:
-            return False
+    #     try:
+    #         with open(RANKING_PATH, "w", encoding="utf-8") as f:
+    #             json.dump(rankings, f, ensure_ascii=False, indent=4)
+    #             return True
+    #     except:
+    #         return False
 
-    def load(self):
-        try:
-            with open(SAVEGAME_PATH, "rb") as f:
-                save_data = pickle.load(f)
-            self.game_map = save_data.get("game_map", [])
-            self.towers = save_data.get("towers", [])
-            self.enemies = save_data.get("enemies", [])
-            self.bullets = save_data.get("bullets", [])
-            self.skills = save_data.get("skills", [])
-            self.path = save_data.get("path", [])
-            self.gold = save_data.get("gold", 100)
-            self.hp = save_data.get("hp", 100)
-            self.wave_data = save_data.get("wave_data", [])
-            self.wave_index = save_data.get("wave_index", 0)
-            self.current_message = save_data.get("current_message", None)
-            self.update_before_game_state()
-            self.wave_data_progressed = copy.deepcopy(self.wave_data)
+    # def load(self):
+    #     try:
+    #         with open(SAVEGAME_PATH, "rb") as f:
+    #             save_data = pickle.load(f)
+    #         self.game_map = save_data.get("game_map", [])
+    #         self.towers = save_data.get("towers", [])
+    #         self.enemies = save_data.get("enemies", [])
+    #         self.bullets = save_data.get("bullets", [])
+    #         self.skills = save_data.get("skills", [])
+    #         self.path = save_data.get("path", [])
+    #         self.gold = save_data.get("gold", 100)
+    #         self.hp = save_data.get("hp", 100)
+    #         self.wave_data = save_data.get("wave_data", [])
+    #         self.wave_index = save_data.get("wave_index", 0)
+    #         self.current_message = save_data.get("current_message", None)
+    #         self.update_before_game_state()
+    #         self.wave_data_progressed = copy.deepcopy(self.wave_data)
             
-            print("게임을 성공적으로 불러왔습니다!")
-            return True
-        except Exception as e:
-            print(f"불러오기 중 오류 발생: {e}")
-            return False
+    #         print(f"게임을 성공적으로 불러왔습니다! ({SAVEGAME_PATH})")
+    #         return True
+    #     except Exception as e:
+    #         print(f"불러오기 중 오류 발생: {e}")
+    #         return False
     
     def pause(self):
         print("멈춤")
@@ -167,7 +172,7 @@ class Game:
         if result[0] == 'exit':
             self.quit()
         elif result[0] == 'confirm':
-            self.save_score(result[1], score)
+            SaveManager.save_score(result[1], score)
             self.quit()
 
     def game_clear(self):
@@ -176,7 +181,7 @@ class Game:
         if result[0] == 'exit':
             self.quit()
         elif result[1] == 'confirm':
-            self.save_score(result[1], score)
+            SaveManager.save_score(result[1], score)
             self.quit()
 
     def add_message(self, text, duration=1.5):
@@ -185,6 +190,7 @@ class Game:
             'timer': duration,
             'max_duration': duration
         }
+
     def quit(self):
         sys.exit(0)
 
@@ -216,14 +222,11 @@ class Game:
             elif enemy.target_index >= len(enemy.shortest_path):
                 self.hp -= 10
                 self.enemies.remove(enemy)
-        for enemy in self.enemies:
-            
-            enemy.move(dt)
-            
-            result = enemy.update(dt)
-
-            if result:
-                self.skills.append(result)
+            else:
+                enemy.move(dt)
+                result = enemy.update(dt)
+                if result:
+                    self.skills.append(result)
         
         for tower in self.towers:
             result = tower.update(dt, self.enemies)
@@ -244,7 +247,8 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                self.save()
+                # self.save()
+                SaveManager.save_game(self)
                 self.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -252,7 +256,7 @@ class Game:
                     pygame.time.set_timer(ENEMY_SPAWN, ENEMY_SPAWN_INTERVAL)
                     return
                 elif event.key == pygame.K_ESCAPE:
-                    self.save()
+                    SaveManager.save_game(self)
                     self.play()
                     return
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -324,7 +328,8 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    self.save()
+                    # self.save()
+                    SaveManager.save_game(self)
                     self.quit()
                 elif event.type == ENEMY_SPAWN:
                     if len(self.wave_data_progressed[self.wave_index]) == 0:
@@ -336,7 +341,8 @@ class Game:
                     if event.key == pygame.K_f:
                         self.pause()
                     elif event.key == pygame.K_ESCAPE:
-                        self.save()
+                        # self.save()
+                        SaveManager.save_game(self)
                         self.go_title()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -433,7 +439,7 @@ class Game:
         if choice == "exit":
             self.quit()
         elif choice == "continue":
-            if not self.load():
+            if not SaveManager.load_game(self):
                 self.quit()
         elif choice == "ranking":
             choice = self.renderer.show_ranking()

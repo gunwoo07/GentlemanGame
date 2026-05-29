@@ -1,6 +1,6 @@
 import pygame
 import os
-from src.core.config import WINDOW_WIDTH, WINDOW_HEIGHT
+from src.core.config import WINDOW_WIDTH, WINDOW_HEIGHT, SAVEGAME_PATH
 
 class MenuButton:
     def __init__(self, text, x, y, width, height, font, color=(100, 100, 100), hover_color=(150, 150, 150)):
@@ -44,7 +44,7 @@ class TitleScreen:
             "exit": MenuButton("종료", start_x, start_y + 320, btn_width, btn_height, self.font)
         }
         
-        self.save_exists = os.path.exists("savegame.pkl")
+        self.save_exists = os.path.exists(SAVEGAME_PATH)
         if not self.save_exists:
             self.buttons["continue"].color = (50, 50, 50) # 비활성화된 느낌
             self.buttons["continue"].hover_color = (50, 50, 50)
