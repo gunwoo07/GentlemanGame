@@ -5,6 +5,7 @@ import json
 import copy
 import pygame
 from src.core.config import *
+from src.core.stages import STAGES
 from src.core.map import *
 from src.core.renderer import Renderer
 from src.entities.tower import Tower, Archer, Cannon, Frost, create_tower
@@ -99,67 +100,6 @@ class Game:
         self.selected_tower_btn = tower_btn
         self.selected_tower_btn.activation = True
     
-    # def save(self):
-    #     # 실행중 필요한 정보 초기화
-    #     self.inactivate_selected_tower()
-    #     self.inactivate_selected_tower_btn()
-
-    #     # pickle로 게임 정보 저장
-    #     try:
-    #         with open(SAVEGAME_PATH, "wb", encoding="utf-8") as f:
-    #             pickle.dump(self.before_game_state, f)
-    #         print(f"게임이 성공적으로 저장되었습니다! ({SAVEGAME_PATH})")
-    #     except Exception as e:
-    #         print(f"게임 저장 중 오류 발생: {e}")
-
-    # def save_score(self, name, score):
-    #     rankings = []
-
-    #     if os.path.exists(RANKING_PATH):
-    #         try:
-    #             with open(RANKING_PATH, "r", encoding="utf-8") as f:
-    #                 rankings = json.load(f)
-    #         except (json.JSONDecodeError, Exception):
-    #             rankings = []
-        
-    #     new_entry = {
-    #         "name": name,
-    #         "score": score
-    #     }
-    #     rankings.append(new_entry)
-    #     rankings.sort(key=lambda x: x.get("score", 0), reverse=True)
-
-    #     try:
-    #         with open(RANKING_PATH, "w", encoding="utf-8") as f:
-    #             json.dump(rankings, f, ensure_ascii=False, indent=4)
-    #             return True
-    #     except:
-    #         return False
-
-    # def load(self):
-    #     try:
-    #         with open(SAVEGAME_PATH, "rb") as f:
-    #             save_data = pickle.load(f)
-    #         self.game_map = save_data.get("game_map", [])
-    #         self.towers = save_data.get("towers", [])
-    #         self.enemies = save_data.get("enemies", [])
-    #         self.bullets = save_data.get("bullets", [])
-    #         self.skills = save_data.get("skills", [])
-    #         self.path = save_data.get("path", [])
-    #         self.gold = save_data.get("gold", 100)
-    #         self.hp = save_data.get("hp", 100)
-    #         self.wave_data = save_data.get("wave_data", [])
-    #         self.wave_index = save_data.get("wave_index", 0)
-    #         self.current_message = save_data.get("current_message", None)
-    #         self.update_before_game_state()
-    #         self.wave_data_progressed = copy.deepcopy(self.wave_data)
-            
-    #         print(f"게임을 성공적으로 불러왔습니다! ({SAVEGAME_PATH})")
-    #         return True
-    #     except Exception as e:
-    #         print(f"불러오기 중 오류 발생: {e}")
-    #         return False
-    
     def pause(self):
         print("멈춤")
     
@@ -173,7 +113,8 @@ class Game:
             self.quit()
         elif result[0] == 'confirm':
             SaveManager.save_score(result[1], score)
-            self.quit()
+            self.run()
+            return
 
     def game_clear(self):
         score = self.get_score()
@@ -182,7 +123,8 @@ class Game:
             self.quit()
         elif result[1] == 'confirm':
             SaveManager.save_score(result[1], score)
-            self.quit()
+            self.run()
+            return
 
     def add_message(self, text, duration=1.5):
         self.current_message = {
@@ -257,7 +199,7 @@ class Game:
                     return
                 elif event.key == pygame.K_ESCAPE:
                     SaveManager.save_game(self)
-                    self.play()
+                    self.run()
                     return
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -341,9 +283,9 @@ class Game:
                     if event.key == pygame.K_f:
                         self.pause()
                     elif event.key == pygame.K_ESCAPE:
-                        # self.save()
                         SaveManager.save_game(self)
-                        self.go_title()
+                        self.run()
+                        return
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         grid_pos = find_grid_pos(event.pos)
@@ -450,68 +392,21 @@ class Game:
                 return
             self.run()
         elif choice == "easy":
-            self.wave_data = [
-                ["normal", "normal", "normal", "normal", "normal"],
-                ["normal", "normal", "normal", "normal", "fast", "fast", "fast", "fast", "fast", "fast"],
-                ["strong", "strong", "strong", "normal", "normal", "normal", "normal", "fast", "fast", "fast"],
-                ["strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast", "fast", "fast"],
-                ["strong", "strong", "strong", "boss"]
-            ]
+            self.wave_data = copy.deepcopy(STAGES["easy"]["wave_data"])
             self.wave_data_progressed = copy.deepcopy(self.wave_data)
-            self.game_map = [
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
-            ]
-
+            self.game_map = STAGES["easy"]["map"][:]
         elif choice == "hard":
-            self.wave_data = [
-                ["normal", "normal", "normal", "normal", "normal", "normal", "normal"],
-                ["normal", "normal", "normal", "normal", "fast", "fast", "fast", "fast", "fast", "fast","fast","fast","fast"],
-                ["strong", "strong", "strong", "strong", "strong","strong", "normal", "normal", "normal", "normal", "fast", "fast", "fast"],
-                ["strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast", "fast", "fast", "strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast"],
-                ["strong", "strong", "strong", "strong", "strong", "strong", "strong", "boss"]
-            ]
+            self.wave_data = copy.deepcopy(STAGES["hard"]["wave_data"])
             self.wave_data_progressed = copy.deepcopy(self.wave_data)
-            self.game_map = [
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1],
-                [2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 3],
-                [1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            ]
-
+            self.game_map = STAGES["hard"]["map"][:]
 
         self.update_before_game_state()
 
         # 웨이브 시작
         self.play()
         # 게임 오버 혹은 랭킹 페이지 저장
-        self.game_clear()
+        if self.hp > 0:
+            self.game_clear()
 
 # game_state = {
 #     "game_map": [[]],

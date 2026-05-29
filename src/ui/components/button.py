@@ -52,3 +52,26 @@ class LevelupButton:
         else:
             levelup_text = font.render(f'최고레벨입니다.(lv {self.tower.max_level})', True, 'white')
         screen.blit(levelup_text, (self.bx + 10, self.by + 5))
+
+
+class MenuButton:
+    def __init__(self, text, x, y, width, height, font, color=(100, 100, 100), hover_color=(150, 150, 150)):
+        self.text = text
+        self.rect = pygame.Rect(x, y, width, height)
+        self.font = font
+        self.color = color
+        self.hover_color = hover_color
+        self.is_hovered = False
+
+    def draw(self, screen):
+        color = self.hover_color if self.is_hovered else self.color
+        pygame.draw.rect(screen, color, self.rect)
+        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
+        
+        text_surf = self.font.render(self.text, True, (255, 255, 255))
+        text_rect = text_surf.get_rect(center=self.rect.center)
+        screen.blit(text_surf, text_rect)
+
+    def check_hover(self, pos):
+        self.is_hovered = self.rect.collidepoint(pos)
+        return self.is_hovered

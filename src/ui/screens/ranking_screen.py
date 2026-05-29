@@ -1,8 +1,8 @@
 import pygame
-import json
-import os
 from src.core.config import WINDOW_WIDTH, WINDOW_HEIGHT, RANKING_PATH
-from src.ui.screens.title_screen import MenuButton
+from src.ui.components.button import MenuButton
+from src.utils.save_load import SaveManager
+
 
 class RankingScreen:
     def __init__(self, screen):
@@ -11,25 +11,12 @@ class RankingScreen:
         self.title_font = pygame.font.SysFont("malgungothic", 60)
         
         # 랭킹 데이터 로드
-        self.rankings = self.load_rankings()
+        self.rankings = SaveManager.load_ranking()
         
         # 뒤로 가기 버튼
         btn_width = 250
         btn_height = 60
         self.back_button = MenuButton("뒤로 가기", (WINDOW_WIDTH - btn_width) // 2, WINDOW_HEIGHT - 120, btn_width, btn_height, self.font)
-
-    def load_rankings(self):
-        # rankings.json 파일에서 데이터를 가져옴
-        if os.path.exists(RANKING_PATH):
-            try:
-                with open(RANKING_PATH, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    # 스코어(웨이브) 기준 내림차순 정렬
-                    return sorted(data, key=lambda x: x.get('score', 0), reverse=True)
-            except Exception as e:
-                print(f"랭킹 로딩 중 오류: {e}")
-                return []
-        return []
 
     def draw(self):
         self.screen.fill((20, 20, 40)) # 배경색

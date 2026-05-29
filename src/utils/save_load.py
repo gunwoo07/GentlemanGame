@@ -6,7 +6,6 @@ from src.core.config import SAVEGAME_PATH, RANKING_PATH
 
 
 class SaveManager:
-    @staticmethod
     def save_game(game):
         # 실행 중 필요한 정보 초기화
         game.inactivate_selected_tower()
@@ -15,11 +14,10 @@ class SaveManager:
         try:
             with open(SAVEGAME_PATH, "wb") as f:
                 pickle.dump(game.before_game_state, f)
-            print("게임이 성공적으로 저장되었습니다!")
+            print(f"게임이 성공적으로 저장되었습니다! ({SAVEGAME_PATH})")
         except Exception as e:
             print(f"게임 저장 중 오류 발생: {e}")
 
-    @staticmethod
     def load_game(game):
         try:
             with open(SAVEGAME_PATH, "rb") as f:
@@ -44,7 +42,6 @@ class SaveManager:
             print(f"불러오기 중 오류 발생: {e}")
             return False
 
-    @staticmethod
     def save_score(name, score):
         ranking = []
 
@@ -68,3 +65,15 @@ class SaveManager:
                 return True
         except:
             return False
+    
+    def load_ranking():
+        if os.path.exists(RANKING_PATH):
+            try:
+                with open(RANKING_PATH, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    # 내림차순 정렬
+                    return sorted(data, key=lambda x: x.get("score", 0), reverse=True)
+            except Exception as e:
+                print(f"랭킹 로딩 중 오류: {e}")
+                return []
+        return []
