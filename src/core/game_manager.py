@@ -43,6 +43,7 @@ class Game:
         self.selected_tower = None
         self.selected_tower_btn = None
         self.is_wave = False
+        self.is_paused = False
         self.update_before_game_state()
 
     def update_before_game_state(self):
@@ -97,8 +98,13 @@ class Game:
         self.selected_tower_btn = tower_btn
         self.selected_tower_btn.activation = True
     
-    def pause(self):
-        print("멈춤")
+    def pause_and_play(self):
+        if not self.is_paused:
+            self.add_message("정지", duration=-1)
+            self.is_paused = True
+        else:
+            self.current_message = None
+            self.is_paused = False
     
     def get_score(self):
         return (self.wave_index+1) + self.hp + self.gold
@@ -186,7 +192,6 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                # self.save()
                 SaveManager.save_game(self)
                 self.quit()
             if event.type == pygame.KEYDOWN:
@@ -264,6 +269,17 @@ class Game:
                     self.inactivate_selected_tower_btn() # 타워 버튼 해제
 
     def wave_event_handler(self):
+            if self.is_paused:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        SaveManager.save_game(self)
+                        self.quit()
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_f:
+                            self.pause_and_play()
+                            return
+                return
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -278,7 +294,8 @@ class Game:
                         self.enemies.append(Enemy(enemy_type, *get_pos(0, START_ROW), self.game_map))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_f:
-                        self.pause()
+                        self.pause_and_play()
+                        return
                     elif event.key == pygame.K_ESCAPE:
                         SaveManager.save_game(self)
                         self.run()
@@ -368,7 +385,8 @@ class Game:
                     return
                 
                 self.wave_event_handler()
-                self.wave_update(dt)
+                if not self.is_paused:
+                    self.wave_update(dt)
                 self.renderer.render(self.export_game_state())
                 pygame.display.flip()
             
