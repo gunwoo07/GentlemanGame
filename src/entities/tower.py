@@ -1,17 +1,14 @@
 import pygame
 from src.core.map import *
 from src.entities.bullet import Bullet
-from src.entities.skill import InfiniteArrow, Bomb, Iceball
+from src.entities.skill import InfiniteArrow, Bomb, Iceball, fire_skill
+from src.core.towers_data import TOWERS_DATA
 
 
 class Tower:
     # 타워마다 다르게 설정해야 함!!!example(archer)
     type_name = "archer"
-    LEVEL_DATA = {
-        1: {"damage": 15, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.90, "cost": 50, "bullet_speed": 300, "color": (0, 255, 0)},
-        2: {"damage": 20, "attack_range": 3.5*TILE_SIZE, "attack_speed": 0.40, "size_rate": 0.95, "cost": 30, "bullet_speed": 310, "color": (0, 150, 0)},
-        3: {"damage": 25, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.35, "size_rate": 1.00, "cost": 20, "bullet_spped": 320, "color": (0, 100, 0)}
-    }
+    LEVEL_DATA = TOWERS_DATA[type_name]
     cost = LEVEL_DATA[1]["cost"]
 
     def __init__(self, x, y):
@@ -70,15 +67,12 @@ class Tower:
     def _find_enemy(self, enemies):
         enemy_distances = [(e, e.left_distance()) for e in enemies]
         enemy_distances.sort(key=lambda x: x[1])
+        enemy_distances = list(filter(lambda x: self._check_enemy_in_range(x[0]), enemy_distances))
         return enemy_distances[0][0] if enemy_distances else None
     
     def _check_enemy_in_range(self, enemy):
         return (pygame.Vector2(enemy.x, enemy.y) - self.pos).length() <= self.attack_range
     
-    # tower 마다 skill이 다르므로 skill 함수를 tower마다 구현해야 함
-    def skill(self, enemies):
-        pass
-
     def attack(self, enemies):
         # 가장 멀리간 enemy를 공격
         target_enemy = self._find_enemy(enemies)
@@ -89,16 +83,13 @@ class Tower:
 
 class Archer(Tower):
     type_name = "archer"
-    LEVEL_DATA = {
-        1: {"damage": 15, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.90, "cost": 50, "bullet_speed": 300, "color": (0, 255, 0)},
-        2: {"damage": 20, "attack_range": 3.5*TILE_SIZE, "attack_speed": 0.40, "size_rate": 0.95, "cost": 30, "bullet_speed": 310, "color": (0, 150, 0)},
-        3: {"damage": 25, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.35, "size_rate": 1.00, "cost": 20, "bullet_speed": 320, "color": (0, 100, 0)}
-    }
+    LEVEL_DATA = TOWERS_DATA[type_name]
+
     cost = LEVEL_DATA[1]["cost"]
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.skill_cooltime = 4
+        self.skill_cooltime = self.LEVEL_DATA[self.level]["skill"]["cooltime"]
         self.skill_cooldown = self.skill_cooltime
 
     def update(self, dt, enemies):
@@ -108,10 +99,7 @@ class Archer(Tower):
             self.attack_cooldown -= dt
             return (None, None)
         else:
-            target_enemy = None
-            for enemy in enemies[::-1]:
-                if self._check_enemy_in_range(enemy):
-                    target_enemy = enemy
+            target_enemy = self._find_enemy(enemies)
             if self.skill_cooldown > 0 and self.attack_cooldown <= 0:
                 self.skill_cooldown -= dt
                 self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
@@ -125,7 +113,7 @@ class Archer(Tower):
                 if target_enemy:
                     self.skill_cooldown = self.skill_cooltime
                     self.skill_rate = 0
-                    return (None, InfiniteArrow(self, target_enemy))
+                    return (None, fire_skill(self, target_enemy, self.LEVEL_DATA[self.level]["skill"]))
                 else:
                     return (None, None)
             else:
@@ -133,7 +121,7 @@ class Archer(Tower):
                     self.skill_cooldown = self.skill_cooltime
                     self.skill_rate = 0
                     self.attack_cooldown = self.attack_speed
-                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), InfiniteArrow(self, target_enemy))
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), fire_skill(self, target_enemy, self.LEVEL_DATA[self.level]["skill"]))
                 else:
                     return (None, None)
         # if self.skill_cooldown > 0:
@@ -158,16 +146,13 @@ class Archer(Tower):
 
 class Cannon(Tower):
     type_name = "cannon"
-    LEVEL_DATA = {
-        1: {"damage": 40, "attack_range": 2.5*TILE_SIZE, "attack_speed": 0.70, "size_rate": 0.90, "cost": 80, "bullet_speed": 400, "color": (211, 211, 211)},
-        2: {"damage": 42, "attack_range": 3.0*TILE_SIZE, "attack_speed": 0.75, "size_rate": 0.95, "cost": 50, "bullet_speed": 410, "color": (169, 169, 169)},
-        3: {"damage": 45, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.80, "size_rate": 1.00, "cost": 50, "bullet_speed": 420, "color": (128, 128, 128)}
-    }
+    LEVEL_DATA = TOWERS_DATA[type_name]
+
     cost = LEVEL_DATA[1]["cost"]
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.skill_cooltime = 5
+        self.skill_cooltime = self.LEVEL_DATA[self.level]["skill"]["cooltime"]
         self.skill_cooldown = self.skill_cooltime
 
     def update(self, dt, enemies):
@@ -177,10 +162,7 @@ class Cannon(Tower):
             self.attack_cooldown -= dt
             return (None, None)
         else:
-            target_enemy = None
-            for enemy in enemies[::-1]:
-                if self._check_enemy_in_range(enemy):
-                    target_enemy = enemy
+            target_enemy = self._find_enemy(enemies)
             if self.skill_cooldown > 0 and self.attack_cooldown <= 0:
                 self.skill_cooldown -= dt
                 self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
@@ -194,7 +176,7 @@ class Cannon(Tower):
                 if target_enemy:
                     self.skill_cooldown = self.skill_cooltime
                     self.skill_rate = 0
-                    return (None, Bomb(self, target_enemy))
+                    return (None, fire_skill(self, target_enemy, self.LEVEL_DATA[self.level]["skill"]))
                 else:
                     return (None, None)
             else:
@@ -202,22 +184,19 @@ class Cannon(Tower):
                     self.skill_cooldown = self.skill_cooltime
                     self.skill_rate = 0
                     self.attack_cooldown = self.attack_speed
-                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), Bomb(self, target_enemy))
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), fire_skill(self, target_enemy, self.LEVEL_DATA[self.level]["skill"]))
                 else:
                     return (None, None)
 
 class Frost(Tower):
     type_name = "frost"
-    LEVEL_DATA = {
-        1: {"damage": 5, "attack_range": 4.0*TILE_SIZE, "attack_speed": 0.60, "size_rate": 0.90, "cost": 40, "bullet_speed": 350, "color": (245, 254, 253)},
-        2: {"damage": 10, "attack_range": 4.5*TILE_SIZE, "attack_speed": 0.50, "size_rate": 0.95, "cost": 30, "bullet_speed": 400, "color": (248, 248, 255)},
-        3: {"damage": 12, "attack_range": 4.7*TILE_SIZE, "attack_speed": 0.45, "size_rate": 1.00, "cost": 30, "bullet_speed": 420, "color": (255, 255, 255)}
-    }
+    LEVEL_DATA = TOWERS_DATA[type_name]
+
     cost = LEVEL_DATA[1]["cost"]
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.skill_cooltime = 3
+        self.skill_cooltime = self.LEVEL_DATA[self.level]["skill"]["cooltime"]
         self.skill_cooldown = self.skill_cooltime
 
     def update(self, dt, enemies):
@@ -227,10 +206,7 @@ class Frost(Tower):
             self.attack_cooldown -= dt
             return (None, None)
         else:
-            target_enemy = None
-            for enemy in enemies[::-1]:
-                if self._check_enemy_in_range(enemy):
-                    target_enemy = enemy
+            target_enemy = self._find_enemy(enemies)
             if self.skill_cooldown > 0 and self.attack_cooldown <= 0:
                 self.skill_cooldown -= dt
                 self.skill_rate = 1 - self.skill_cooldown / self.skill_cooltime
@@ -244,7 +220,7 @@ class Frost(Tower):
                 if target_enemy:
                     self.skill_cooldown = self.skill_cooltime
                     self.skill_rate = 0
-                    return (None, Iceball(self, target_enemy))
+                    return (None, fire_skill(self, target_enemy, self.LEVEL_DATA[self.level]["skill"]))
                 else:
                     return (None, None)
             else:
@@ -252,7 +228,7 @@ class Frost(Tower):
                     self.skill_cooldown = self.skill_cooltime
                     self.skill_rate = 0
                     self.attack_cooldown = self.attack_speed
-                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), Iceball(self, target_enemy))
+                    return (Bullet(self, target_enemy, self.damage, self.bullet_speed, self.color), fire_skill(self, target_enemy, self.LEVEL_DATA[self.level]["skill"]))
                 else:
                     return (None, None)
     
