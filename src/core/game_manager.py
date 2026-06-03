@@ -434,11 +434,11 @@ class Game:
         elif choice == "easy":
             self.wave_data = copy.deepcopy(STAGES["easy"]["wave_data"])
             self.wave_data_progressed = copy.deepcopy(self.wave_data)
-            self.game_map = STAGES["easy"]["map"][:]
+            self.game_map = copy.deepcopy(STAGES["easy"]["map"])
         elif choice == "hard":
             self.wave_data = copy.deepcopy(STAGES["hard"]["wave_data"])
             self.wave_data_progressed = copy.deepcopy(self.wave_data)
-            self.game_map = STAGES["hard"]["map"][:]
+            self.game_map = copy.deepcopy(STAGES["hard"]["map"])
 
         self.update_before_game_state()
 
