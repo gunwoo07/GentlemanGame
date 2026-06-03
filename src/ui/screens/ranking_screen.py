@@ -79,6 +79,8 @@ class RankingScreen:
         return None
 
     def run(self):
+        # 랭킹 데이터 로드
+        self.rankings = SaveManager.load_ranking()
         clock = pygame.time.Clock()
         while True:
             result = self.handle_event()

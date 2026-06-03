@@ -46,6 +46,29 @@ class Game:
         self.is_paused = False
         self.update_before_game_state()
 
+    def init_game(self):
+                # 게임구성 정보
+        self.game_map = [[]]
+        self.towers = []
+        self.enemies = []
+        self.bullets = []
+        self.skills = []
+        self.path = [[]]
+        self.gold = 200
+        self.hp = 100
+        self.wave_data = [[]]
+        self.wave_index = 0
+        self.before_game_state = {}
+
+        # 실행 중 필요한 정보
+        self.current_message = None
+        self.wave_data_progressed = copy.deepcopy(self.wave_data)
+        self.selected_tower = None
+        self.selected_tower_btn = None
+        self.is_wave = False
+        self.is_paused = False
+        self.update_before_game_state()
+    
     def update_before_game_state(self):
         if self.selected_tower:
             self.selected_tower.is_selected = False
@@ -112,6 +135,7 @@ class Game:
     def game_over(self):
         score = self.get_score()
         result = self.renderer.show_result(False, score, self.wave_index)
+        self.init_game()
         if result[0] == 'exit':
             self.quit()
         elif result[0] == 'confirm':
@@ -122,6 +146,7 @@ class Game:
     def game_clear(self):
         score = self.get_score()
         result = self.renderer.show_result(True, score, self.wave_index)
+        self.init_game()
         if result[0] == 'exit':
             self.quit()
         elif result[1] == 'confirm':
