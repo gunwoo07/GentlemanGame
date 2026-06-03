@@ -45,13 +45,17 @@ class SaveManager:
     def save_score(name, score):
         ranking = []
 
+        os.makedirs(os.path.dirname(RANKING_PATH), exist_ok=True)
+
         if os.path.exists(RANKING_PATH):
             try:
                 with open(RANKING_PATH, 'r', encoding='utf-8') as f:
                     ranking = json.load(f)
             except (json.JSONDecodeError, Exception):
                 ranking = []
-        
+        else:
+            ranking = []
+                
         new_entry = {
             "name": name,
             "score": score
@@ -63,7 +67,8 @@ class SaveManager:
             with open(RANKING_PATH, "w", encoding="utf-8") as f:
                 json.dump(ranking, f, ensure_ascii=False, indent=4)
                 return True
-        except:
+        except Exception as e:
+            print(f"점수 저장 중 오류 발생: {e}")
             return False
     
     def load_ranking():
