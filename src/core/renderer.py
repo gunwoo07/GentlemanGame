@@ -17,7 +17,8 @@ class Renderer:
         self.title_screen = TitleScreen(self.screen)
         self.ranking_screen = RankingScreen(self.screen)
         self.BACKGROUND_COLOR = (75, 0, 130)
-
+        self.current_bgm = None
+        
         self.selected_tower = None
         # 버튼 시작 위치 및 간격 계산
         start_x = MARGIN * 2
@@ -38,13 +39,16 @@ class Renderer:
                 self.selected_tower = tower
                 break
     
-    def show_title(self):
+    def show_title(self, bgm):
+        self.play_bgm(bgm)
         return self.title_screen.run()
     
-    def show_ranking(self):
+    def show_ranking(self, bgm):
+        self.play_bgm(bgm)
         return self.ranking_screen.run()
     
-    def show_result(self, is_win, score, wave_index):
+    def show_result(self, is_win, score, wave_index, bgm):
+        self.play_bgm(bgm)
         result_screen = ResultScreen(self.screen, is_win, score, wave_index+1)
         return result_screen.run()
     
@@ -64,6 +68,7 @@ class Renderer:
         self.draw_stat({"hp": game_state["hp"], "gold": game_state["gold"], "wave": game_state["wave_index"]+1, "max_wave": len(game_state["wave_data"])})
         self.draw_message(game_state['current_message'])
         self.draw_blank()
+        self.play_bgm(game_state['bgm'])
 
     def draw_map(self, game_map):
         for i in range(ROWS):
@@ -216,3 +221,14 @@ class Renderer:
         # 세로
         pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (0, 0, MARGIN, WINDOW_HEIGHT))
         pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, (MARGIN+MAP_WIDTH, 0, MARGIN, WINDOW_HEIGHT))
+    
+    def play_bgm(self, bgm):
+        if self.current_bgm == bgm:
+            return
+        try:
+            pygame.mixer.music.fadeout(500)
+            pygame.mixer.music.load(bgm)
+            pygame.mixer.music.play(-1)
+            self.current_bgm = bgm
+        except Exception as e:
+            print(f"BGM 에러: {e}")

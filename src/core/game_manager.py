@@ -41,6 +41,7 @@ class Game:
 
         # 실행 중 필요한 정보
         self.current_message = None
+        self.bgm = BGM_MENU_PATH
         self.wave_data_progressed = copy.deepcopy(self.wave_data)
         self.selected_tower = None
         self.selected_tower_btn = None
@@ -64,6 +65,7 @@ class Game:
 
         # 실행 중 필요한 정보
         self.current_message = None
+        self.bgm = BGM_MENU_PATH
         self.wave_data_progressed = copy.deepcopy(self.wave_data)
         self.selected_tower = None
         self.selected_tower_btn = None
@@ -85,7 +87,8 @@ class Game:
             "hp": self.hp,
             "wave_data": self.wave_data,
             "wave_index": self.wave_index,
-            "current_message": None
+            "current_message": None,
+            "bgm": None
         })
         if self.selected_tower:
             self.selected_tower.is_selected = True
@@ -102,7 +105,8 @@ class Game:
             "hp": self.hp,
             "wave_data": self.wave_data,
             "wave_index": self.wave_index,
-            "current_message": self.current_message
+            "current_message": self.current_message,
+            "bgm": self.bgm
         }
     
     def inactivate_selected_tower(self):
@@ -136,7 +140,7 @@ class Game:
 
     def game_over(self):
         score = self.get_score()
-        result = self.renderer.show_result(False, score, self.wave_index)
+        result = self.renderer.show_result(False, score, self.wave_index, self.bgm)
         self.init_game()
         if result[0] == 'exit':
             self.quit()
@@ -147,7 +151,7 @@ class Game:
 
     def game_clear(self):
         score = self.get_score()
-        result = self.renderer.show_result(True, score, self.wave_index)
+        result = self.renderer.show_result(True, score, self.wave_index, self.bgm)
         self.init_game()
         if result[0] == 'exit':
             self.quit()
@@ -437,14 +441,16 @@ class Game:
             
     def run(self):
         # 타이틀 띄우기
-        choice = self.renderer.show_title()
+        self.bgm = BGM_MENU_PATH # 메뉴 bgm 깔기
+        choice = self.renderer.show_title(self.bgm)
         if choice == "exit":
             self.quit()
         elif choice == "continue":
             if not SaveManager.load_game(self):
                 self.quit()
         elif choice == "ranking":
-            choice = self.renderer.show_ranking()
+            self.bgm = BGM_MENU_PATH
+            choice = self.renderer.show_ranking(self.bgm)
             if choice == 'exit':
                 self.quit()
             elif choice == 'back':
@@ -452,10 +458,12 @@ class Game:
                 return
             self.run()
         elif choice == "easy":
+            self.bgm = BGM_GAME_PATH
             self.wave_data = copy.deepcopy(STAGES["easy"]["wave_data"])
             self.wave_data_progressed = copy.deepcopy(self.wave_data)
             self.game_map = copy.deepcopy(STAGES["easy"]["map"])
         elif choice == "hard":
+            self.bgm = BGM_GAME_PATH
             self.wave_data = copy.deepcopy(STAGES["hard"]["wave_data"])
             self.wave_data_progressed = copy.deepcopy(self.wave_data)
             self.game_map = copy.deepcopy(STAGES["hard"]["map"])
@@ -463,6 +471,7 @@ class Game:
         self.update_before_game_state()
 
         # 웨이브 시작
+        self.bgm = BGM_GAME_PATH # 게임 bgm 깔기
         self.play()
         # 게임 오버 혹은 랭킹 페이지 저장
         if self.hp > 0:
