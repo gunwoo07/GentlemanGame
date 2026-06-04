@@ -155,7 +155,7 @@ class Game:
         self.init_game()
         if result[0] == 'exit':
             self.quit()
-        elif result[1] == 'confirm':
+        elif result[0] == 'confirm':
             SaveManager.save_score(result[1], score)
             self.run()
             return
@@ -463,6 +463,7 @@ class Game:
                 dt *= self.speed_multiplier
 
                 if self.hp <= 0:
+                    print("over")
                     self.is_wave = False
                     self.game_over()
                     return

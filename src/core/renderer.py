@@ -11,6 +11,9 @@ from src.ui.screens.title_screen import TitleScreen
 from src.ui.screens.ranking_screen import RankingScreen
 from src.ui.screens.result_screen import ResultScreen
 
+from copy import deepcopy
+from src.core.map import find_shortest_path
+
 
 class Renderer:
     def __init__(self, screen):
@@ -258,6 +261,44 @@ class Renderer:
                 int(TILE_SIZE * 0.4)
             )
             self.screen.blit(temp_surface, (0, 0))
+
+                    # 가상으로 타워 설치
+            temp_map = deepcopy(game_map)
+            temp_map[x][y] = 4
+
+            new_path = find_shortest_path(
+                temp_map,
+                0,
+                START_ROW
+            )
+
+            # 길이 존재하면 미리보기 표시
+            if new_path:
+                path_surface = pygame.Surface(
+                    (WINDOW_WIDTH, WINDOW_HEIGHT),
+                    pygame.SRCALPHA
+                )
+
+                for i in range(len(new_path) - 1):
+                    start_pos = get_pos(
+                        new_path[i][0],
+                        new_path[i][1]
+                    )
+
+                    end_pos = get_pos(
+                        new_path[i + 1][0],
+                        new_path[i + 1][1]
+                    )
+
+                    pygame.draw.line(
+                        path_surface,
+                        (0, 255, 255, 120),   # 연한 하늘색
+                        start_pos,
+                        end_pos,
+                        5
+                    )
+
+                self.screen.blit(path_surface, (0, 0))
 
     def draw_blank(self):
         # 가로

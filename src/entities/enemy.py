@@ -8,7 +8,7 @@ enemy_info = [
     (200, 45, 5), # hp, speed, gold,  / normal
     (200, 60, 8), # fast
     (400, 35, 10), # strong
-    (8000, 25, 500) # boss
+    (800, 25, 500) # boss
 ]
 
 enemy_type = ["normal", "fast", "strong", "boss"]
