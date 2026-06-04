@@ -312,7 +312,7 @@ class Game:
 
                         # 매각 버튼 클릭했을 때
                         if self.renderer.sell_btn.rect.collidepoint(event.pos): 
-                            sell_price = self.selected_tower.get_sell_price()
+                            sell_price = self.renderer.sell_btn.sell_price
                             self.gold += sell_price
                             self.game_map[self.selected_tower.grid_x][self.selected_tower.grid_y] = 0
                             self.towers.remove(self.selected_tower)
@@ -424,7 +424,7 @@ class Game:
 
                             # 매각 버튼 클릭했을 때
                             if self.renderer.sell_btn.rect.collidepoint(event.pos): 
-                                sell_price = self.selected_tower.get_sell_price()
+                                sell_price = self.renderer.sell_btn.sell_price
                                 self.gold += sell_price
                                 self.game_map[self.selected_tower.grid_x][self.selected_tower.grid_y] = 0
                                 self.towers.remove(self.selected_tower)

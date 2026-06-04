@@ -80,16 +80,17 @@ class SellButton:
     WIDTH = 120
     HEIGHT = 40
 
-    def __init__(self, tower, x, y):
-        self.tower = tower
+    def __init__(self, x, y):
         self.rect = pygame.Rect(x, y, self.WIDTH, self.HEIGHT)
+        self.sell_price = 0
 
-    def draw(self, screen, font):
+    def draw(self, screen, font, sell_price):
+        self.sell_price = sell_price
         pygame.draw.rect(screen, (180, 60, 60), self.rect)
         pygame.draw.rect(screen, "white", self.rect, 2)
 
         text = font.render(
-            f"판매 ({self.tower.get_sell_price()}G)",
+            f"판매 ({self.sell_price}G)",
             True,
             "white"
         )

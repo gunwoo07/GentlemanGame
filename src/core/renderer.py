@@ -35,7 +35,7 @@ class Renderer:
             "frost": TowerButton(Frost, start_x + (TowerButton.WIDTH + btn_margin) * 2, btn_y)
         }
         self.levelup_btn = LevelupButton(None, 0, 0)  # 초기화는 나중에 tower가 선택될 때 이루어짐
-        self.sell_btn = SellButton(None, 0, 0)
+        self.sell_btn = SellButton(0, 0)
     
     def check_is_tower_selected(self, towers):
         self.selected_tower = None
@@ -150,11 +150,10 @@ class Renderer:
 
             # 판매 버튼
             self.sell_btn = SellButton(
-                self.selected_tower,
                 tower_info_x + 140,
                 tower_info_y + 70
             )
-            self.sell_btn.draw(self.screen, self.font)
+            self.sell_btn.draw(self.screen, self.font, self.selected_tower.get_sell_price())
         else:
             # 1. 하단 스탯 창 배경 (검은색 상자)
             stat_rect = (MARGIN, MARGIN*2 + MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT)
