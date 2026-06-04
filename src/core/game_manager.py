@@ -454,6 +454,7 @@ class Game:
                 dt *= self.speed_multiplier
                 self.rest_update(dt)
                 self.rest_event_handler()
+                self.renderer.selected_tower_btn = self.selected_tower_btn
                 self.renderer.render(self.export_game_state())
                 pygame.display.flip()
             self.update_before_game_state()
@@ -469,6 +470,7 @@ class Game:
                 self.wave_event_handler()
                 if not self.is_paused:
                     self.wave_update(dt)
+                self.renderer.selected_tower_btn = self.selected_tower_btn
                 self.renderer.render(self.export_game_state())
                 pygame.display.flip()
             

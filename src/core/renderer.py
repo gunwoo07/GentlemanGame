@@ -1,6 +1,6 @@
 import pygame
 from src.core.config import *
-from src.core.map import get_pos_lefttop, get_pos
+from src.core.map import find_grid_pos, get_pos_lefttop, get_pos
 from src.entities.tower import Archer, Cannon, Frost
 from src.ui.components.button import (
     TowerButton,
@@ -23,6 +23,7 @@ class Renderer:
         self.BACKGROUND_COLOR = (75, 0, 130)
         self.current_bgm = None
         
+        self.selected_tower_btn = None
         self.selected_tower = None
         # 버튼 시작 위치 및 간격 계산
         start_x = MARGIN * 2
@@ -61,9 +62,8 @@ class Renderer:
         # 선택된 타워가 있는지 확인
         self.check_is_tower_selected(game_state['towers'])
         
-        # self.screen.fill((75, 0, 130)) # indigo blue
-        # self.draw_map(game_state["map"])
         self.draw_map(game_state['game_map'])
+        self.draw_tower_preview(game_state['game_map'])
         self.draw_path(game_state['path'])
         self.draw_towers(game_state['towers'])
         self.draw_enemies(game_state['enemies'])
@@ -224,6 +224,40 @@ class Renderer:
 
         self.screen.blit(bg_surf, bg_rect)
         self.screen.blit(temp_surf, text_rect)
+
+    def draw_tower_preview(self, game_map):
+        
+        if not self.selected_tower_btn:
+            return
+        mouse_pos = pygame.mouse.get_pos()
+        grid_pos = find_grid_pos(mouse_pos)
+        if grid_pos:
+            x, y = grid_pos
+            if game_map[x][y] != 0:
+                return
+            center = get_pos(y, x)
+            tower_class = self.selected_tower_btn.tower_class
+            temp_surface = pygame.Surface(
+                (WINDOW_WIDTH, WINDOW_HEIGHT),
+                pygame.SRCALPHA
+            )
+            # 공격 범위
+            pygame.draw.circle(
+                temp_surface,
+                (255, 255, 255, 70),
+                center,
+                tower_class.LEVEL_DATA[1]["attack_range"],
+                2
+            )
+
+            # 타워 본체
+            pygame.draw.circle(
+                temp_surface,
+                (*tower_class.LEVEL_DATA[1]["color"], 120),
+                center,
+                int(TILE_SIZE * 0.4)
+            )
+            self.screen.blit(temp_surface, (0, 0))
 
     def draw_blank(self):
         # 가로
