@@ -377,6 +377,7 @@ class Game:
                                 self.inactivate_selected_tower_btn() # 타워버튼 비활성화
                                 self.gold -= new_tower.cost # 골드 차감
                                 self.activate_selected_tower(new_tower) # 타워 활성화
+                                self.path = find_shortest_path(self.game_map, 0, START_ROW) # 최단경로 재탐색
                                 for enemy in self.enemies: enemy.update_shortest_path(self.game_map) # enemy들 최단경로 재탐색
                             # 타워가 선택되어있고, 타워를 클릭했을 때
                             elif self.selected_tower and self.game_map[grid_pos[0]][grid_pos[1]] == 4:
@@ -391,6 +392,7 @@ class Game:
                                             # 그 외
                                             self.inactivate_selected_tower() # 기존 타워 비활성화
                                             self.activate_selected_tower(tower) # 병합한 타워 활성화
+                                            self.path = find_shortest_path(self.game_map, 0, START_ROW) # 최단경로 재탐색
                                             for enemy in self.enemies: enemy.update_shortest_path(self.game_map) # enemy들 최단경로 재탐색
                                         else:
                                             self.inactivate_selected_tower() # 타워 비활성화
