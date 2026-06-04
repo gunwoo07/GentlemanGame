@@ -158,10 +158,12 @@ class Renderer:
             text2 = self.font.render("타워 선택/배치/합체: 좌클릭", True, 'white')
             text3 = self.font.render("선택 취소: 우클릭", True, 'white')
             text4 = self.font.render("F: 일시정지   ESC: 타이틀", True, 'white')
+            text5 = self.font.render("2: 2배속 on/off", True, 'white')
             self.screen.blit(text1, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y))
             self.screen.blit(text2, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 40))
             self.screen.blit(text3, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 60))
             self.screen.blit(text4, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 80))
+            self.screen.blit(text5, (start_x + (TowerButton.WIDTH + 15) * 3, btn_y + 100))
 
 
     def draw_path(self, path):

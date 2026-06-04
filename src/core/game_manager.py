@@ -36,6 +36,8 @@ class Game:
         self.wave_data = [[]]
         self.wave_index = 0
         self.before_game_state = {}
+        self.speed_multiplier = 1
+        self.spawn_timer = 0
 
         # 실행 중 필요한 정보
         self.current_message = None
@@ -171,6 +173,21 @@ class Game:
                 self.current_message = None
 
     def wave_update(self, dt):
+        self.spawn_timer += dt
+
+        spawn_interval = ENEMY_SPAWN_INTERVAL / 1000
+
+        while self.spawn_timer >= spawn_interval:
+            self.spawn_timer -= spawn_interval
+
+            if len(self.wave_data_progressed[self.wave_index]) > 0:
+                enemy_type = self.wave_data_progressed[self.wave_index].pop(0)
+                self.enemies.append(
+                    Enemy(enemy_type,
+                        *get_pos(0, START_ROW),
+                        self.game_map)
+                )
+
         # 종료 조건
         if len(self.wave_data_progressed[self.wave_index]) == 0 and len(self.enemies) == 0:
             self.bullets = []
@@ -222,7 +239,7 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.is_wave = True
-                    pygame.time.set_timer(ENEMY_SPAWN, ENEMY_SPAWN_INTERVAL)
+                    self.spawn_timer = 0
                     return
                 elif event.key == pygame.K_ESCAPE:
                     SaveManager.save_game(self)
@@ -311,12 +328,6 @@ class Game:
                     # self.save()
                     SaveManager.save_game(self)
                     self.quit()
-                elif event.type == ENEMY_SPAWN:
-                    if len(self.wave_data_progressed[self.wave_index]) == 0:
-                        pygame.time.set_timer(ENEMY_SPAWN, 0)
-                    else:
-                        enemy_type = self.wave_data_progressed[self.wave_index].pop(0)
-                        self.enemies.append(Enemy(enemy_type, *get_pos(0, START_ROW), self.game_map))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_f:
                         self.pause_and_play()
@@ -325,6 +336,13 @@ class Game:
                         SaveManager.save_game(self)
                         self.run()
                         return
+                    elif event.key == pygame.K_2:
+                        if self.speed_multiplier == 1:
+                            self.speed_multiplier = 2
+                        else:
+                            self.speed_multiplier = 1
+                        return
+                
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         grid_pos = find_grid_pos(event.pos)
@@ -396,6 +414,7 @@ class Game:
             self.update_before_game_state()
             while not self.is_wave:
                 dt = self.clock.tick(60) / 1000
+                dt *= self.speed_multiplier
                 self.rest_update(dt)
                 self.rest_event_handler()
                 self.renderer.render(self.export_game_state())
@@ -403,6 +422,7 @@ class Game:
             self.update_before_game_state()
             while self.is_wave:
                 dt = self.clock.tick(60) / 1000
+                dt *= self.speed_multiplier
 
                 if self.hp <= 0:
                     self.is_wave = False
