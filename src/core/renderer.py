@@ -2,7 +2,11 @@ import pygame
 from src.core.config import *
 from src.core.map import get_pos_lefttop, get_pos
 from src.entities.tower import Archer, Cannon, Frost
-from src.ui.components.button import TowerButton, LevelupButton
+from src.ui.components.button import (
+    TowerButton,
+    LevelupButton,
+    SellButton
+)
 from src.ui.screens.title_screen import TitleScreen
 from src.ui.screens.ranking_screen import RankingScreen
 from src.ui.screens.result_screen import ResultScreen
@@ -31,6 +35,7 @@ class Renderer:
             "frost": TowerButton(Frost, start_x + (TowerButton.WIDTH + btn_margin) * 2, btn_y)
         }
         self.levelup_btn = LevelupButton(None, 0, 0)  # 초기화는 나중에 tower가 선택될 때 이루어짐
+        self.sell_btn = SellButton(None, 0, 0)
     
     def check_is_tower_selected(self, towers):
         self.selected_tower = None
@@ -142,6 +147,14 @@ class Renderer:
             # 레벨업 버튼
             self.levelup_btn = LevelupButton(self.selected_tower, tower_info_x, tower_info_y + 70)
             self.levelup_btn.draw(self.screen, self.font)
+
+            # 판매 버튼
+            self.sell_btn = SellButton(
+                self.selected_tower,
+                tower_info_x + 140,
+                tower_info_y + 70
+            )
+            self.sell_btn.draw(self.screen, self.font)
         else:
             # 1. 하단 스탯 창 배경 (검은색 상자)
             stat_rect = (MARGIN, MARGIN*2 + MAP_HEIGHT, STAT_WIDTH, STAT_HEIGHT)

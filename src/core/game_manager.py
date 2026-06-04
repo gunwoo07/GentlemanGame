@@ -309,6 +309,20 @@ class Game:
                             else:
                                 self.gold -= self.selected_tower.LEVEL_DATA[self.selected_tower.level + 1]["cost"]
                                 self.selected_tower.level_up()
+
+                        # 매각 버튼 클릭했을 때
+                        if self.renderer.sell_btn.rect.collidepoint(event.pos): 
+                            sell_price = self.selected_tower.get_sell_price()
+                            self.gold += sell_price
+                            self.game_map[self.selected_tower.grid_x][self.selected_tower.grid_y] = 0
+                            self.towers.remove(self.selected_tower)
+                            self.inactivate_selected_tower()
+                            self.path = find_shortest_path(
+                                self.game_map,
+                                0,
+                                START_ROW
+                            )
+                            self.add_message(f"{sell_price} 골드 획득")
                     self.update_before_game_state()
                 elif event.button == 3:
                     self.inactivate_selected_tower() # 타워 해제
@@ -407,6 +421,23 @@ class Game:
                                 else:
                                     self.gold -= self.selected_tower.LEVEL_DATA[self.selected_tower.level + 1]["cost"]
                                     self.selected_tower.level_up()
+
+                            # 매각 버튼 클릭했을 때
+                            if self.renderer.sell_btn.rect.collidepoint(event.pos): 
+                                sell_price = self.selected_tower.get_sell_price()
+                                self.gold += sell_price
+                                self.game_map[self.selected_tower.grid_x][self.selected_tower.grid_y] = 0
+                                self.towers.remove(self.selected_tower)
+                                self.inactivate_selected_tower()
+                                self.path = find_shortest_path(
+                                    self.game_map,
+                                    0,
+                                    START_ROW
+                                )
+                                self.add_message(f"{sell_price} 골드 획득")
+                                for enemy in self.enemies:
+                                    enemy.update_shortest_path(self.game_map)
+
                     elif event.button == 3:
                         self.inactivate_selected_tower() # 타워 해제
                         self.inactivate_selected_tower_btn() # 타워 버튼 해제
@@ -442,6 +473,7 @@ class Game:
     def run(self):
         # 타이틀 띄우기
         self.bgm = BGM_MENU_PATH # 메뉴 bgm 깔기
+        self.init_game()
         choice = self.renderer.show_title(self.bgm)
         if choice == "exit":
             self.quit()

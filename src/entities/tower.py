@@ -56,6 +56,14 @@ class Tower:
         self.size_rate = self.LEVEL_DATA[self.level]["size_rate"]
         self.bullet_speed = self.LEVEL_DATA[self.level]["bullet_speed"]
         self.color = self.LEVEL_DATA[self.level]["color"]
+
+    def get_sell_price(self):
+        total_cost = self.cost
+
+        for lv in range(2, self.level + 1):
+            total_cost += self.LEVEL_DATA[lv]["cost"]
+
+        return int(total_cost * 0.8)
     
     # merge 조건을 game_manager에서 확인하고 이 함수를 실행해야 함
     def merge(self, other):

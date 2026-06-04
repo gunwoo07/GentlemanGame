@@ -75,3 +75,25 @@ class MenuButton:
     def check_hover(self, pos):
         self.is_hovered = self.rect.collidepoint(pos)
         return self.is_hovered
+    
+class SellButton:
+    WIDTH = 120
+    HEIGHT = 40
+
+    def __init__(self, tower, x, y):
+        self.tower = tower
+        self.rect = pygame.Rect(x, y, self.WIDTH, self.HEIGHT)
+
+    def draw(self, screen, font):
+        pygame.draw.rect(screen, (180, 60, 60), self.rect)
+        pygame.draw.rect(screen, "white", self.rect, 2)
+
+        text = font.render(
+            f"판매 ({self.tower.get_sell_price()}G)",
+            True,
+            "white"
+        )
+        screen.blit(
+            text,
+            text.get_rect(center=self.rect.center)
+        )
