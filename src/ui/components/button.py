@@ -32,7 +32,7 @@ class TowerButton:
 
 
 class LevelupButton:
-    WIDTH = 200
+    WIDTH = 120
     HEIGHT = 30
 
     def __init__(self, tower, bx, by):
@@ -43,14 +43,14 @@ class LevelupButton:
     
     def draw(self, screen, font):
         # 버튼 배경 및 테두리
-        pygame.draw.rect(screen, (60, 60, 60), self.rect)
+        pygame.draw.rect(screen, (50, 150, 255), self.rect)  # 연한 하늘색
         pygame.draw.rect(screen, 'white', self.rect, 1)
 
         # 텍스트 정보(최고레벨이면 레벨업 불가능)
         if self.tower.level < self.tower.max_level:
             levelup_text = font.render(f'레벨업 ({self.tower.LEVEL_DATA[self.tower.level+1]['cost']}G)', True, 'white')
         else:
-            levelup_text = font.render(f'최고레벨입니다.(lv {self.tower.max_level})', True, 'white')
+            levelup_text = font.render(f'최고레벨(lv {self.tower.max_level})', True, 'white')
         screen.blit(levelup_text, (self.bx + 10, self.by + 5))
 
 
@@ -78,7 +78,7 @@ class MenuButton:
     
 class SellButton:
     WIDTH = 120
-    HEIGHT = 40
+    HEIGHT = 30
 
     def __init__(self, x, y):
         self.rect = pygame.Rect(x, y, self.WIDTH, self.HEIGHT)
@@ -87,7 +87,7 @@ class SellButton:
     def draw(self, screen, font, sell_price):
         self.sell_price = sell_price
         pygame.draw.rect(screen, (180, 60, 60), self.rect)
-        pygame.draw.rect(screen, "white", self.rect, 2)
+        pygame.draw.rect(screen, "white", self.rect, 1)
 
         text = font.render(
             f"판매 ({self.sell_price}G)",
