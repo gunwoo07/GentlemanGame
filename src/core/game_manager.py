@@ -136,7 +136,7 @@ class Game:
             self.is_paused = False
     
     def get_score(self):
-        return (self.wave_index+1) + self.hp + self.gold
+        return 100 * (self.wave_index + 1) + 10 * self.hp + self.gold
 
     def game_over(self):
         score = self.get_score()
