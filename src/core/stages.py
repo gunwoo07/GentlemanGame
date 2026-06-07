@@ -45,8 +45,8 @@ HARD_MAP = [
 ]
 
 HARD_WAVE_DATA = [
-    ["normal", "normal", "normal", "normal", "normal", "normal", "normal"],
-    ["normal", "normal", "normal", "normal", "fast", "fast", "fast", "fast", "fast", "fast","fast","fast","fast"],
+    ["normal", "normal", "normal", "normal", "normal", "normal"],
+    ["normal", "normal", "normal", "normal", "fast", "fast", "fast", "fast", "fast", "fast", "fast"],
     ["strong", "strong", "strong", "strong", "strong","strong", "normal", "normal", "normal", "normal", "fast", "fast", "fast"],
     ["strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast", "fast", "fast", "strong", "strong", "strong", "strong", "strong", "strong", "fast", "fast", "fast"],
     ["strong", "strong", "strong", "strong", "strong", "strong", "strong", "boss"]

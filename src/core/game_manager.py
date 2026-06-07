@@ -38,6 +38,7 @@ class Game:
         self.before_game_state = {}
         self.speed_multiplier = 1
         self.spawn_timer = 0
+        self.difficulty = None
 
         # 실행 중 필요한 정보
         self.current_message = None
@@ -189,7 +190,9 @@ class Game:
                 self.enemies.append(
                     Enemy(enemy_type,
                         *get_pos(0, START_ROW),
-                        self.game_map)
+                        self.game_map,
+                        self.difficulty
+                        )
                 )
 
         # 종료 조건
@@ -495,11 +498,13 @@ class Game:
                 return
             self.run()
         elif choice == "easy":
+            self.difficulty = "easy"
             self.bgm = BGM_GAME_PATH
             self.wave_data = copy.deepcopy(STAGES["easy"]["wave_data"])
             self.wave_data_progressed = copy.deepcopy(self.wave_data)
             self.game_map = copy.deepcopy(STAGES["easy"]["map"])
         elif choice == "hard":
+            self.difficulty = "hard"
             self.bgm = BGM_GAME_PATH
             self.wave_data = copy.deepcopy(STAGES["hard"]["wave_data"])
             self.wave_data_progressed = copy.deepcopy(self.wave_data)

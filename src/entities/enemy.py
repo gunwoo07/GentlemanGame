@@ -5,10 +5,10 @@ from src.core.config import *
 import math
 
 enemy_info = [
-    (200, 45, 5), # hp, speed, gold,  / normal
-    (200, 60, 8), # fast
-    (400, 35, 10), # strong
-    (800, 25, 500) # boss
+    (250, 45, 5), # hp, speed, gold,  / normal
+    (200, 80, 8), # fast
+    (500, 35, 10), # strong
+    (12000, 20, 500) # boss
 ]
 
 enemy_type = ["normal", "fast", "strong", "boss"]
@@ -32,7 +32,7 @@ def movey(ty, y, speed):
     return y, 0
 
 class Enemy:
-    def __init__(self, type, x, y, game_map):
+    def __init__(self, type, x, y, game_map, difficulty=None):
         self.type = type
         self.x = x
         self.y = y
@@ -44,35 +44,33 @@ class Enemy:
         self.skill_timer = 0
         self.is_invincible = False
         self.is_casting = False
+        self.difficulty = difficulty
 
         self.game_map = game_map
 
         if type in enemy_type:
             self.hp = enemy_info[enemy_type.index(self.type)][0]
             self.max_hp = enemy_info[enemy_type.index(self.type)][0]
+            if self.difficulty == "hard":
+                self.hp *= 1.5
+                self.max_hp *= 1.5
             self.speed = enemy_info[enemy_type.index(self.type)][1]
             self.gold = enemy_info[enemy_type.index(self.type)][2]
 
     def update_shortest_path(self, game_map):
-        # 1. 현재 픽셀 위치를 격자 단위(소수점 포함)로 변환
         grid_y = (self.y - MARGIN) / TILE_SIZE
         grid_x = (self.x - MARGIN) / TILE_SIZE
         
-        # 2. 현재 정수 좌표(Tile Index) 구하기
         logical_y = int(grid_y)
         logical_x = int(grid_x)
         
-        # 3. [핵심] 0.5 타일 이상 이동했다면 다음 타일을 시작점으로 간주
         if grid_y - logical_y > 0.5: logical_y += 1
         if grid_x - logical_x > 0.5: logical_x += 1
         
-        # 4. 예측된 '논리적 위치'에서 새 경로 탐색
-        # (기존 find_shortest_path의 인자 순서에 맞춰 grid_x, grid_y를 적절히 배치)
         new_path = find_shortest_path(game_map, logical_x, logical_y)
         
         if new_path:
             self.shortest_path = new_path
-            # 5. 타겟 인덱스를 1로 설정하여 다음 칸으로 즉시 향하게 함
             self.target_index = 1
         return self.shortest_path
     
@@ -86,35 +84,27 @@ class Enemy:
         if self.is_casting:
             return
             
-        # 더 이상 이동할 경로가 없다면 탈출 (기지 도달)
         if self.target_index >= len(self.shortest_path):
             return
 
-        # 이번 프레임에 이동해야 할 총 거리
         distance_to_move = self.speed * dt
 
         while distance_to_move > 0 and self.target_index < len(self.shortest_path):
-            # 목적지 타일의 픽셀 위치 구하기
             tx, ty = get_pos(self.shortest_path[self.target_index][0], self.shortest_path[self.target_index][1])
 
-            # 현재 위치에서 목적지까지의 x, y 거리
             dx = tx - self.x
             dy = ty - self.y
             
-            # 목적지까지 남은 직선 거리 직선 거리 계산 (피타고라스)
             distance_to_target = math.hypot(dx, dy)
 
-            # 1. 이번 프레임 이동 거리가 목적지까지 남은 거리보다 크거나 같다면 (목적지 도달)
             if distance_to_move >= distance_to_target:
-                self.x = tx  # 목적지에 정확히 안착
+                self.x = tx
                 self.y = ty
-                distance_to_move -= distance_to_target  # 남은 이동 거리 차감
-                self.target_index += 1  # ★ 다음 타일을 목적지로 설정!
+                distance_to_move -= distance_to_target  
+                self.target_index += 1  
             
-            # 2. 아직 목적지에 도달하지 못했다면 현재 방향으로 전진 후 종료
             else:
                 if distance_to_target > 0:
-                    # 방향 벡터를 이용해 정확한 속도로 이동
                     self.x += (dx / distance_to_target) * distance_to_move
                     self.y += (dy / distance_to_target) * distance_to_move
                 distance_to_move = 0  
@@ -158,11 +148,8 @@ class Enemy:
         hp_ratio = max(0, self.hp) / self.max_hp
         hp_fill_width = int(bar_width * hp_ratio)
 
-        # 배경 바
         pygame.draw.rect(screen, (40, 40, 40), (bar_x, bar_y, bar_width, bar_height))
-        # 체력 바
         pygame.draw.rect(screen, (0, 220, 0), (bar_x, bar_y, hp_fill_width, bar_height))
-        # 테두리
         pygame.draw.rect(screen, (255, 255, 255), (bar_x, bar_y, bar_width, bar_height), 1)
 
 
@@ -178,7 +165,6 @@ class BossSkill(Skill):
         self.spawn_interval = 0.5
         self.spawn_timer = 0
 
-        # 보스 상태
         self.boss.is_invincible = True
         self.boss.is_casting = True
 
@@ -189,10 +175,9 @@ class BossSkill(Skill):
         # 적 소환
         if self.spawn_timer >= self.spawn_interval:
             self.spawn_timer = 0
-
             enemies.append(
                 Enemy(
-                    "normal",
+                    "strong",
                     self.boss.x,
                     self.boss.y,
                     self.boss.game_map
