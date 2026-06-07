@@ -11,5 +11,5 @@ WINDOW_WIDTH = MAP_WIDTH + MARGIN * 2
 WINDOW_HEIGHT = MAP_HEIGHT + STAT_HEIGHT + MARGIN * 3
 RANKING_PATH = './data/ranking.json'
 SAVEGAME_PATH = './data/savegame.pkl'
-BGM_MENU_PATH = './assets/sounds/HappyPlace.mp3'
+BGM_MENU_PATH = './assets/sounds/HappyPlace.mp3' # Track - Alexander Nakarada - Happy Place
 BGM_GAME_PATH = './assets/sounds/gentleman.mp3'
